@@ -1,0 +1,147 @@
+=== LOG THAY ĐỔI HỆ THỐNG NHẬT TRÌNH GANG ===
+
+[2026-01-23] CẬP NHẬT CHÍNH - 7 CÔNG ĐOẠN + HRC + TPHH
+
+1. CÔNG ĐOẠN (TỪ 4 lên 7 công đoạn)
+   - Stage 1: Bắt đầu vận chuyển (GioBatDau)
+   - Stage 2: Vào gian chờ thép (GioVaoLT)
+   - Stage 3: Vào KR - CHỈ HRC (GioVaoKR)
+   - Stage 4: Ra KR - CHỈ HRC (GioRaKR)
+   - Stage 5: Rót xong (GioRotXong)
+   - Stage 6: Hoàn tất - Ra luyện thép (GioRaLT)
+   - Stage 7: Đúc gang (GioDucGang) - GHÉP VÀO STAGE 6 ĐỂ HIỂN THỊ
+
+2. LOGIC ĐIỂM ĐẦU / ĐIỂM ĐẾN
+   - Điểm đầu: Lò Cao 1, Lò Cao 2, Lò Cao 3, Lò Cao 4, Lò Cao 5, Lò Cao 6
+   - Điểm đến: HRC1, HRC2, Đúc Gang
+   
+   RULE ĐẶC BIỆT:
+   - Nếu DiemDen = "Đúc Gang" → Stage 1 xác nhận thẳng chuyển sang hoàn tất (stage 6/7)
+     * API: { GioDucGang: now(), TinhTrang: 1 }
+     * Bỏ qua stage 2, 3, 4, 5
+   
+   - Nếu DiemDen = HRC1 hoặc HRC2:
+     * Hiển thị stage 3 (Vào KR) và stage 4 (Ra KR)
+     * Luồng: 1 → 2 → 3 → 4 → 5 → 6
+     * Stage 2 có nút "Xác Nhận Vào KR" (màu tím)
+   
+   - Nếu DiemDen khác (không HRC, không Đúc Gang):
+     * Ẩn stage 3, 4 (KR)
+     * Luồng: 1 → 2 → 5 → 6
+
+3. PHÂN QUYỀN VÀ FILTER
+   VIEW:
+     - Xem toàn bộ công đoạn (1-6, bao gồm KR)
+     - Xem toàn bộ thùng (không filter)
+     - Click thùng để xem thông tin TPHH + timeline
+     - KHÔNG có các nút chức năng (Edit, Rollback, Xóa, Xác nhận)
+   
+   TRUONGKIP:
+     - Xem toàn bộ công đoạn (1-6, bao gồm KR)
+     - Xem toàn bộ thùng (không filter)
+     - Phân bổ vận chuyển mới
+     - Xác nhận công đoạn
+     - Xóa thùng (stage 1)
+     - Rollback (stage 2+)
+     - Edit thông tin (stage 1)
+   
+   LOCAO1, LOCAO2, LOCAO3, LOCAO4, LOCAO5, LOCAO6:
+     - Hiển thị: Stage 1, 2, 5, 6 (ẨN stage 3, 4 KR)
+     - Filter: Chỉ xem thùng có DiemDau = "Lò Cao X"
+     - Xác nhận công đoạn
+     - KHÔNG phân bổ mới
+   
+   HRC1, HRC2:
+     - Hiển thị: Stage 2, 3, 4, 5 (ẨN stage 1, 6)
+     - Filter: Chỉ xem thùng có DiemDen = "HRCX"
+     - Xác nhận công đoạn
+     - KHÔNG phân bổ mới
+
+4. THÔNG TIN TPHH (Thành Phần Hóa Học)
+   Hiển thị trong modal xác nhận công đoạn:
+   - Mẻ (string)
+   - Khối lượng (decimal, tấn)
+   - Nhiệt độ thùng (int, °C)
+   - C - Carbon (%)
+   - Si - Silicon (%)
+   - Mn - Manganese (%)
+   - P - Phosphorus (%)
+   - S - Sulfur (%)
+   
+   Layout modal:
+   - Phần 1: Thông tin thùng (Số thùng | Điểm đầu → Điểm đến)
+   - Phần 2: TPHH (8 ô, grid auto-fit minmax(110px, 1fr))
+   - Phần 3: Timeline hành trình (7 công đoạn với timestamp)
+
+5. CHỨC NĂNG ROLLBACK
+   - Hiển thị nút "↶" (màu cam) ở góc thùng
+   - Chỉ hiện khi currentStage > 1 và có quyền __CAN_CONFIRM_STAGE__
+   - Chức năng: Quay lại công đoạn trước
+   - API: Gửi mốc thời gian = "0001-01-01T00:00:00" để xóa
+   - Ví dụ: Stage 3 rollback → Stage 2, gửi { GioVaoKR: "0001-01-01T00:00:00" }
+   - ⚠️ Cảnh báo: Xóa mốc thời gian công đoạn hiện tại
+
+6. CHỨC NĂNG EDIT
+   - Hiển thị nút "✏️ Chỉnh Sửa" trong modal
+   - Chỉ hiện khi stage = 1 và có quyền __CAN_CONFIRM_STAGE__
+   - Cho phép sửa: Số thùng, Điểm đầu, Điểm đến
+   - API: PUT /api/gang-nhat-trinh/{id} { SoThung, DiemDau, DiemDen }
+
+7. GHI CHÉP GANG - XEM CHI TIẾT
+   - Bổ sung cột "Chi Tiết" trong bảng lịch sử
+   - Nút "🔍 Xem" mỗi dòng
+   - Click → Mở modal (tái sử dụng confirmModal)
+   - Hiển thị:
+     * Thông tin thùng
+     * TPHH đầy đủ
+     * Timeline hành trình với mốc thời gian
+     * Highlight công đoạn cuối cùng
+   - Ẩn tất cả nút chức năng (chỉ xem)
+
+8. API ENDPOINT MỚI
+   GET /api/gang-nhat-trinh/latest
+   - Tự động lấy dữ liệu ca sản xuất mới nhất
+   - Không cần query parameter idLoCao
+   - Client-side filtering theo DiemDau và DiemDen
+   - Auto-refresh mỗi 5s cho Sơ Đồ Vận Hành
+
+9. RESPONSIVE LAYOUT
+   - Stages wrapper: grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+   - Tự động điều chỉnh số cột theo số công đoạn hiển thị
+   - TPHH grid: repeat(auto-fit, minmax(110px, 1fr))
+   - Badge size: 0.55rem font, 2px 6px padding
+   - Modal gọc hơn: margin/padding giảm, không cần cuộn
+
+10. TỐI ƯU GIẢO DIỆN
+    - Modal body gap: 20px → 12px
+    - Modal actions margin-top: 30px → 20px, padding-top: 25px → 15px
+    - Thông tin thùng: font 1.2rem → 0.95rem, padding 15px → 8px
+    - TPHH section: padding 15px → 8px, gap 10px → 4px
+    - TPHH items: padding 8px → 5px, font 0.75rem → 0.65rem (label)
+    - Selector cụ thể hóa: #confirmModal .modal-actions .modal-btn-confirm
+
+=== QUY TRÌNH XÁC NHẬN ===
+
+SỠ DỤNG BÌNH THƯỜNG (KHÔNG PHẢI HRC, KHÔNG PHẢI ĐÚC GANG):
+Stage 1 [GioBatDau] → Xác nhận → { GioVaoLT: now() }
+Stage 2 [GioVaoLT] → Xác nhận → { GioRotXong: now() }
+Stage 5 [GioRotXong] → Xác nhận → { GioRaLT: now(), TinhTrang: 1 }
+Stage 6 [GioRaLT] → Hoàn tất → Chọn chu kỳ tiếp theo
+
+SỠ DỤNG HRC1/HRC2:
+Stage 1 [GioBatDau] → Xác nhận → { GioVaoLT: now() }
+Stage 2 [GioVaoLT] → Nút "Xác Nhận Vào KR" → { GioVaoKR: now() }
+Stage 3 [GioVaoKR] → Xác nhận → { GioRaKR: now() }
+Stage 4 [GioRaKR] → Xác nhận → { GioRotXong: now() }
+Stage 5 [GioRotXong] → Xác nhận → { GioRaLT: now(), TinhTrang: 1 }
+Stage 6 [GioRaLT] → Hoàn tất → Chọn chu kỳ tiếp theo
+
+SỠ DỤNG ĐÚC GANG:
+Stage 1 [GioBatDau] → Xác nhận → { GioDucGang: now(), TinhTrang: 1 } (Thẳng hoàn tất)
+Stage 6/7 [GioDucGang] → Hoàn tất
+
+=== FIX LOG ===
+- Fix duplicate variable: editBtn, confirmKRBtn trong showConfirmModal
+- Fix selector: .modal-btn-confirm:not(#confirmKRBtn) → #confirmModal .modal-actions .modal-btn-confirm:not(#confirmKRBtn)
+- Fix: Nút "Xem" bị ẩn do selector quá rộng
+- Fix: Modal không cần alert "Không có quyền" - chỉ ẩn nút chức năng

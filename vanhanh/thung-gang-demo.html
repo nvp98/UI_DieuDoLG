@@ -1,0 +1,4415 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ Thống Giám Sát Vận Chuyển Thùng Gang</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-orange: #ff8c42;
+        --dark-bg: #0f1419;
+        --card-bg: #1a1f2e;
+        --accent-cyan: #22d3ee;
+        --success-green: #10b981;
+        --warning-yellow: #f59e0b;
+        --error-red: #ef4444;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border-color: #2d3748;
+        --border-glow: rgba(34, 211, 238, 0.3);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        background: linear-gradient(135deg, var(--dark-bg) 0%, #1e293b 100%);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 20px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+          radial-gradient(
+            circle at 20% 50%,
+            rgba(255, 140, 66, 0.08) 0%,
+            transparent 50%
+          ),
+          radial-gradient(
+            circle at 80% 80%,
+            rgba(34, 211, 238, 0.08) 0%,
+            transparent 50%
+          );
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .container {
+        max-width: 1600px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+      }
+
+      header {
+        text-align: center;
+        margin-bottom: 40px;
+        animation: slideDown 0.8s ease-out;
+      }
+
+      h1 {
+        font-family: "Inter", sans-serif;
+        font-size: 2.75rem;
+        font-weight: 800;
+        background: linear-gradient(
+          135deg,
+          var(--accent-cyan),
+          var(--primary-orange)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+        margin-bottom: 12px;
+      }
+
+      .subtitle {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        letter-spacing: 0.5px;
+      }
+
+      .section {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 30px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(0, 217, 255, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out backwards;
+      }
+
+      .section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-orange),
+          var(--accent-cyan),
+          var(--primary-orange)
+        );
+        background-size: 200% 100%;
+        animation: shimmer 3s linear infinite;
+      }
+
+      .section:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .section:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+      .section:nth-child(4) {
+        animation-delay: 0.3s;
+      }
+
+      .section-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: var(--accent-cyan);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        background: var(--primary-orange);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--primary-orange);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .input-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      input {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(0, 217, 255, 0.3);
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-family: "Roboto Mono", monospace;
+        font-size: 1rem;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+      select {
+        /* background: rgba(255, 255, 255, 0.05); */
+        border: 2px solid rgba(0, 217, 255, 0.3);
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-family: "Roboto Mono", monospace;
+        font-size: 1rem;
+        /* color: var(--text-primary); */
+        transition: all 0.3s ease;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+        /* background: rgba(255, 255, 255, 0.08); */
+      }
+
+      input::placeholder {
+        color: var(--text-muted);
+      }
+
+      button {
+        background: linear-gradient(135deg, var(--primary-orange), #ff8c42);
+        border: none;
+        border-radius: 8px;
+        padding: 14px 32px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(255, 107, 53, 0.4);
+        position: relative;
+        overflow: hidden;
+      }
+
+      button::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.5s,
+          height 0.5s;
+      }
+
+      button:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 30px rgba(255, 107, 53, 0.6);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      button span {
+        position: relative;
+        z-index: 1;
+      }
+
+      .status-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      .status-card {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.05),
+          rgba(255, 255, 255, 0.02)
+        );
+        border: 2px solid rgba(0, 217, 255, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+      }
+
+      .status-card:hover {
+        transform: translateY(-5px) scale(1.02);
+        border-color: var(--accent-cyan);
+        box-shadow: 0 12px 40px rgba(0, 217, 255, 0.3);
+      }
+
+      .status-card.completed {
+        border-color: var(--text-muted);
+        opacity: 0.6;
+      }
+
+      .ladle-item {
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        padding: 8px;
+        margin-bottom: 8px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+      }
+
+      .ladle-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: white;
+        position: relative;
+        flex-shrink: 0;
+      }
+
+      .ladle-item.processing .ladle-icon {
+        animation: iconPulse 1s ease-in-out infinite;
+      }
+
+      .ladle-item.waiting-confirm {
+        cursor: pointer;
+      }
+
+      .ladle-item.waiting-confirm:hover {
+        transform: translateX(3px);
+      }
+
+      /* Màu sắc theo công đoạn */
+      .stage-section[data-stage="1"] .ladle-icon {
+        background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+      }
+
+      .stage-section[data-stage="2"] .ladle-icon {
+        background: linear-gradient(135deg, #ff6b35, #ff8c42);
+      }
+
+      .stage-section[data-stage="3"] .ladle-icon {
+        background: linear-gradient(135deg, #00bfa5, #00897b);
+      }
+
+      .stage-section[data-stage="4"] .ladle-icon {
+        background: linear-gradient(135deg, #00d9ff, #00a8cc);
+      }
+
+      .ladle-details {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+        min-width: 0;
+      }
+
+      .ladle-id {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+      }
+
+      .ladle-time {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-family: "Roboto Mono", monospace;
+      }
+
+      .ladle-status {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .ladle-status.processing {
+        background: rgba(255, 215, 0, 0.2);
+        color: var(--warning-yellow);
+        border: 1px solid var(--warning-yellow);
+      }
+
+      .ladle-status.waiting {
+        background: rgba(0, 255, 136, 0.2);
+        color: var(--success-green);
+        border: 1px solid var(--success-green);
+        animation: badgeBlink 1s ease-in-out infinite;
+      }
+
+      /* Dot nhấp nháy cho trạng thái processing */
+      .ladle-item.processing .ladle-icon::after {
+        content: "";
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        width: 12px;
+        height: 12px;
+        background: #ff0000;
+        border-radius: 50%;
+        border: 2px solid var(--card-bg);
+        animation: pulse 1s ease-in-out infinite;
+      }
+
+      /* Dot xanh lá cho trạng thái chờ xác nhận */
+      .ladle-item.waiting-confirm .ladle-icon::after {
+        content: "";
+        position: absolute;
+        top: -3px;
+        right: -3px;
+        width: 12px;
+        height: 12px;
+        background: var(--success-green);
+        border-radius: 50%;
+        border: 2px solid var(--card-bg);
+        animation: pulse 1s ease-in-out infinite;
+      }
+
+      .stages-wrapper {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+      }
+
+      /* Layout ngang cho HRC */
+      .stages-wrapper.hrc-horizontal {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        padding: 5px 0;
+      }
+
+      .stages-wrapper.hrc-horizontal .stage-section {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .stages-wrapper.hrc-horizontal .stage-ladles {
+        padding: 15px;
+        max-height: 600px;
+      }
+
+      .stages-wrapper.hrc-horizontal .ladle-item {
+        margin-bottom: 12px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+      }
+
+      .stages-wrapper.hrc-horizontal .stage-header {
+        padding: 20px;
+      }
+
+      .stage-section {
+        display: flex;
+        flex-direction: column;
+        background: rgba(255, 255, 255, 0.02);
+        border-radius: 12px;
+        border: 2px solid rgba(0, 217, 255, 0.2);
+        overflow: hidden;
+        min-height: 400px;
+      }
+
+      .stage-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 16px;
+        background: rgba(0, 217, 255, 0.05);
+        border-bottom: 2px solid rgba(0, 217, 255, 0.2);
+        flex-shrink: 0;
+      }
+
+      .stage-icon {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 217, 255, 0.1);
+        border-radius: 50%;
+        margin-bottom: 8px;
+      }
+
+      .stage-name {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        text-align: center;
+        line-height: 1.3;
+      }
+
+      .stage-count {
+        background: rgba(255, 107, 53, 0.2);
+        color: var(--primary-orange);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        margin-top: 8px;
+      }
+
+      .stage-ladles {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 12px;
+        max-height: 500px;
+      }
+
+      .stage-ladles::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .stage-ladles::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+      }
+
+      .stage-ladles::-webkit-scrollbar-thumb {
+        background: rgba(0, 217, 255, 0.3);
+        border-radius: 4px;
+      }
+
+      .stage-ladles::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 217, 255, 0.5);
+      }
+
+      .stage-section.has-active .stage-header {
+        background: rgba(255, 0, 0, 0.1);
+        border-left-color: #ff0000;
+        animation: headerAlert 1s ease-in-out infinite;
+      }
+
+      .stage-section.has-active .stage-icon {
+        background: rgba(255, 0, 0, 0.2);
+        animation: iconPulse 1s ease-in-out infinite;
+      }
+
+      .stage-section.has-active .stage-count {
+        background: rgba(255, 0, 0, 0.3);
+        color: #ff0000;
+        animation: countBlink 1s ease-in-out infinite;
+      }
+
+      .empty-stage {
+        text-align: center;
+        padding: 20px;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-style: italic;
+      }
+
+      .filter-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 15px;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .filter-group.wide {
+        min-width: 200px;
+      }
+
+      .filter-btn {
+        padding: 12px 24px;
+        margin-top: auto;
+      }
+
+      .reset-btn {
+        background: linear-gradient(135deg, #666, #888);
+      }
+
+      .reset-btn:hover {
+        box-shadow: 0 4px 20px rgba(128, 128, 128, 0.5);
+      }
+
+      .table-wrapper {
+        overflow-x: hidden;
+        overflow-y: auto;
+        max-height: 500px;
+        position: relative;
+      }
+
+      .delete-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 24px;
+        height: 24px;
+        background: rgba(255, 0, 0, 0.8);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        z-index: 10;
+        padding: 0;
+      }
+
+      .delete-btn:hover {
+        background: #ff0000;
+        transform: scale(1.15);
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+      }
+
+      .ladle-item {
+        position: relative;
+      }
+
+      /* Modal xác nhận */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .modal-overlay.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-content {
+        background: var(--card-bg);
+        border: 2px solid var(--accent-cyan);
+        border-radius: 16px;
+        padding: 35px;
+        max-width: 700px;
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        animation: slideUp 0.3s ease;
+        position: relative;
+      }
+
+      .modal-content::-webkit-scrollbar {
+        width: 10px;
+      }
+
+      .modal-content::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 5px;
+      }
+
+      .modal-content::-webkit-scrollbar-thumb {
+        background: rgba(0, 217, 255, 0.4);
+        border-radius: 5px;
+      }
+
+      .modal-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 217, 255, 0.6);
+      }
+
+      .modal-content::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+          90deg,
+          var(--primary-orange),
+          var(--accent-cyan),
+          var(--primary-orange)
+        );
+        background-size: 200% 100%;
+        animation: shimmer 3s linear infinite;
+        border-radius: 16px 16px 0 0;
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid rgba(0, 217, 255, 0.2);
+      }
+
+      .modal-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        background: linear-gradient(135deg, var(--primary-orange), #ff8c42);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .modal-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent-cyan);
+      }
+
+      .modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 15px;
+      }
+
+      .modal-timeline-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .modal-timeline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px;
+        background: rgba(0, 217, 255, 0.05);
+        border-radius: 12px;
+        border: 2px solid rgba(0, 217, 255, 0.2);
+        position: relative;
+      }
+
+      .timeline-step {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .timeline-step-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        transition: all 0.3s ease;
+      }
+
+      .timeline-step.active .timeline-step-icon {
+        background: linear-gradient(135deg, var(--accent-cyan), #00a8cc);
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .timeline-step-label {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        text-align: center;
+        line-height: 1.3;
+        max-width: 120px;
+      }
+
+      .timeline-step.active .timeline-step-label {
+        color: var(--accent-cyan);
+      }
+
+      .timeline-step-time {
+        font-family: "Roboto Mono", monospace;
+        font-weight: 600;
+        font-size: 0.75rem;
+        color: var(--success-green);
+        text-align: center;
+        margin-top: 8px;
+        padding: 4px 8px;
+        background: rgba(0, 255, 136, 0.1);
+        border-radius: 4px;
+        border: 1px solid rgba(0, 255, 136, 0.3);
+      }
+
+      .timeline-step-time:empty,
+      .timeline-step-time:contains("-") {
+        opacity: 0.3;
+        color: var(--text-secondary);
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+
+      .timeline-arrow {
+        flex: 0 0 40px;
+        font-size: 1.5rem;
+        color: rgba(255, 255, 255, 0.3);
+        z-index: 1;
+      }
+
+      .timeline-step.active ~ .timeline-arrow {
+        color: rgba(0, 217, 255, 0.5);
+      }
+
+      .modal-description-area {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+      }
+
+      @media (max-width: 900px) {
+        .modal-description-area {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .modal-info {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid rgba(0, 217, 255, 0.15);
+      }
+
+      .modal-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      @media (max-width: 768px) {
+        .modal-info-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .modal-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        gap: 15px;
+      }
+
+      .modal-info-row:last-child {
+        border-bottom: none;
+      }
+
+      .modal-info-label {
+        color: var(--accent-cyan);
+        font-size: 0.95rem;
+        font-weight: 600;
+        font-family: "Orbitron", sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .modal-info-value {
+        color: var(--text-primary);
+        font-weight: 700;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.05rem;
+      }
+
+      .modal-stage-info {
+        background: rgba(0, 217, 255, 0.08);
+        border: 2px solid var(--accent-cyan);
+        border-radius: 10px;
+        padding: 18px;
+        text-align: center;
+      }
+
+      .modal-stage-current {
+        font-size: 1.2rem;
+        color: var(--accent-cyan);
+        font-weight: 700;
+        font-family: "Orbitron", sans-serif;
+        margin-bottom: 15px;
+        padding: 12px;
+        background: rgba(0, 217, 255, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(0, 217, 255, 0.3);
+      }
+
+      .modal-stage-arrow {
+        font-size: 2rem;
+        color: var(--primary-orange);
+        margin: 10px 0;
+      }
+
+      .modal-stage-next {
+        font-size: 1.2rem;
+        color: var(--success-green);
+        font-weight: 700;
+        font-family: "Orbitron", sans-serif;
+        padding: 12px;
+        background: rgba(0, 255, 136, 0.1);
+        border-radius: 8px;
+        border: 1px solid rgba(0, 255, 136, 0.3);
+      }
+
+      /* Note boxes cho ghi chú tình trạng */
+      .status-note-box {
+        margin: 15px 0;
+        padding: 15px;
+        border-radius: 10px;
+        background: rgba(0, 217, 255, 0.08);
+        border-left: 4px solid var(--accent-cyan);
+        transition: all 0.3s ease;
+      }
+
+      .status-note-box:hover {
+        background: rgba(0, 217, 255, 0.12);
+        transform: translateX(3px);
+      }
+
+      .status-note-title {
+        color: var(--accent-cyan);
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Orbitron", sans-serif;
+      }
+
+      .status-note-content {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        line-height: 1.6;
+      }
+
+      .action-note-box {
+        margin: 15px 0;
+        padding: 15px;
+        border-radius: 10px;
+        background: rgba(0, 255, 136, 0.08);
+        border-left: 4px solid var(--success-green);
+        transition: all 0.3s ease;
+      }
+
+      .action-note-box:hover {
+        background: rgba(0, 255, 136, 0.12);
+        transform: translateX(3px);
+      }
+
+      .action-note-title {
+        color: var(--success-green);
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Orbitron", sans-serif;
+      }
+
+      .action-note-content {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        line-height: 1.6;
+      }
+
+      .confirm-header-text {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--success-green);
+        text-align: center;
+        padding: 12px;
+        margin: 15px 0;
+        background: rgba(0, 255, 136, 0.15);
+        border-radius: 8px;
+        border: 2px solid var(--success-green);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-family: "Orbitron", sans-serif;
+      }
+
+      .modal-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 2px solid rgba(0, 217, 255, 0.2);
+      }
+
+      /* Style cho input/select trong modal */
+      #editModal input,
+      #editModal select {
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(0, 217, 255, 0.4);
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-family: "Roboto Mono", monospace;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+
+      #editModal input:focus,
+      #editModal select:focus {
+        outline: none;
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      #editModal input::placeholder {
+        color: var(--text-muted);
+      }
+
+      #editModal .input-group label {
+        color: var(--accent-cyan);
+        font-size: 0.8rem;
+        margin-bottom: 8px;
+      }
+
+      /* Style cho radio button */
+      .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .radio-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+      }
+
+      .radio-label input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--accent-cyan);
+        cursor: pointer;
+        margin: 0;
+      }
+
+      .radio-label:hover {
+        color: var(--accent-cyan);
+        transform: translateX(3px);
+      }
+
+      .radio-label span {
+        font-weight: 500;
+      }
+
+      .modal-btn {
+        flex: 1;
+        padding: 16px 20px;
+        border: none;
+        border-radius: 10px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-btn-confirm {
+        background: linear-gradient(135deg, var(--success-green), #00cc70);
+        color: white;
+      }
+
+      .modal-btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0, 255, 136, 0.5);
+      }
+
+      .modal-btn-cancel {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-primary);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .modal-btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: rgba(255, 255, 255, 0.5);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .status-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 217, 255, 0.2),
+          rgba(0, 217, 255, 0.05)
+        );
+        border: 2px solid var(--accent-cyan);
+      }
+
+      .status-card.active .status-icon {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 255, 136, 0.3),
+          rgba(0, 255, 136, 0.1)
+        );
+        border-color: var(--success-green);
+        animation: rotate 3s linear infinite;
+      }
+
+      .status-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--accent-cyan);
+      }
+
+      .status-card.active .status-title {
+        color: var(--success-green);
+      }
+
+      .status-time {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      .history-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+      }
+
+      .history-table th {
+        background: rgba(0, 217, 255, 0.1);
+        padding: 6px 4px;
+        text-align: left;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.55rem;
+        font-weight: 700;
+        color: var(--accent-cyan);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        border-bottom: 2px solid var(--accent-cyan);
+        max-width: 80px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        word-wrap: break-word;
+      }
+
+      .history-table td {
+        background: rgba(255, 255, 255, 0.03);
+        padding: 6px 4px;
+        border-top: 1px solid rgba(0, 217, 255, 0.1);
+        border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+        font-size: 0.6rem;
+        white-space: nowrap;
+        max-width: 80px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .history-table tr {
+        transition: all 0.3s ease;
+      }
+
+      .history-table tbody tr:hover {
+        background: rgba(0, 217, 255, 0.05);
+        transform: translateX(5px);
+      }
+
+      .history-table td:first-child {
+        border-left: 1px solid rgba(0, 217, 255, 0.1);
+        border-radius: 8px 0 0 8px;
+      }
+
+      .history-table td:last-child {
+        border-right: 1px solid rgba(0, 217, 255, 0.1);
+        border-radius: 0 8px 8px 0;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 12px;
+        font-size: 0.55rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .badge.completed {
+        background: rgba(0, 255, 136, 0.2);
+        color: var(--success-green);
+        border: 1px solid var(--success-green);
+      }
+
+      .badge.in-progress {
+        background: rgba(255, 215, 0, 0.2);
+        color: var(--warning-yellow);
+        border: 1px solid var(--warning-yellow);
+      }
+
+      .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+        padding: 15px;
+      }
+
+      .pagination button {
+        padding: 8px 15px;
+        background: rgba(0, 217, 255, 0.1);
+        border: 1px solid var(--accent-cyan);
+        color: var(--accent-cyan);
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+      }
+
+      .pagination button:hover:not(:disabled) {
+        background: rgba(0, 217, 255, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .pagination .page-info {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin: 0 10px;
+      }
+
+      .no-data {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-muted);
+        font-style: italic;
+      }
+
+      /* Thùng hoàn tất – chờ chu kỳ mới */
+      .ladle-item.completed {
+        opacity: 0.95;
+      }
+
+      .ladle-item.completed .ladle-icon {
+        background: linear-gradient(135deg, #00ff88, #00cc70) !important;
+        box-shadow: 0 0 12px rgba(0, 255, 136, 0.6);
+      }
+
+      .ladle-item.completed .ladle-status {
+        background: rgba(0, 255, 136, 0.2);
+        color: var(--success-green);
+        border: 1px solid var(--success-green);
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(1.5);
+        }
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: -200% 0;
+        }
+        100% {
+          background-position: 200% 0;
+        }
+      }
+
+      @keyframes glowPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 40px rgba(0, 255, 136, 0.6);
+        }
+      }
+
+      @keyframes rotate {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes redAlert {
+        0%,
+        100% {
+          border-color: #ff0000;
+          box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+        }
+        50% {
+          border-color: #ff4444;
+          box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+        }
+      }
+
+      @keyframes textBlink {
+        0%,
+        100% {
+          color: #ff0000;
+          text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        50% {
+          color: #ff6666;
+          text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+        }
+      }
+
+      @keyframes badgeBlink {
+        0%,
+        100% {
+          background: rgba(255, 0, 0, 0.3);
+          box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+        }
+        50% {
+          background: rgba(255, 0, 0, 0.5);
+          box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+        }
+      }
+
+      @keyframes headerAlert {
+        0%,
+        100% {
+          background: rgba(255, 0, 0, 0.1);
+        }
+        50% {
+          background: rgba(255, 0, 0, 0.2);
+        }
+      }
+
+      @keyframes iconPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          background: rgba(255, 0, 0, 0.2);
+        }
+        50% {
+          transform: scale(1.1);
+          background: rgba(255, 0, 0, 0.4);
+        }
+      }
+
+      @keyframes countBlink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 2rem;
+        }
+
+        .section {
+          padding: 20px;
+        }
+
+        .input-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stages-wrapper {
+          grid-template-columns: 1fr;
+        }
+
+        .stage-section {
+          min-height: 300px;
+        }
+      }
+
+      @media (max-width: 1200px) {
+        .stages-wrapper {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>🏭 Hệ Thống Vận Chuyển Thùng Gang</h1>
+        <p class="subtitle">Giám Sát & Quản Lý Thời Gian Thực</p>
+        <button
+          id="logoutBtn"
+          onclick="logout()"
+          style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            padding: 10px 18px;
+            font-family: &quot;Orbitron&quot;, sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #666, #888);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+          "
+        >
+          🔓 Logout
+        </button>
+      </header>
+
+      <!-- VÙNG 1: NHẬP LIỆU -->
+      <div class="section">
+        <h2 class="section-title">Phân Bổ Vận Chuyển</h2>
+
+        <div
+          style="
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1.5fr;
+            gap: 25px;
+            margin-bottom: 25px;
+            align-items: flex-start;
+          "
+        >
+          <!-- Số Thùng Gang -->
+          <div>
+            <label
+              style="
+                display: block;
+                margin-bottom: 12px;
+                color: var(--text-muted);
+                font-size: 0.85rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              "
+              >Số Thùng Gang</label
+            >
+            <input
+              type="text"
+              id="soThung"
+              placeholder="VD: 01"
+              style="width: 100%"
+            />
+          </div>
+
+          <!-- Điểm Đầu -->
+          <div>
+            <label
+              style="
+                display: block;
+                margin-bottom: 12px;
+                color: var(--accent-cyan);
+                font-size: 0.85rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              "
+              >Điểm Đầu</label
+            >
+            <div
+              class="radio-group"
+              style="gap: 8px; flex-direction: row; flex-wrap: wrap"
+            >
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="diemDau" value="Lò Cao 1" />
+                <span>Lò Cao 1</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="diemDau" value="Lò Cao 2" />
+                <span>Lò Cao 2</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="diemDau" value="Lò Cao 3" />
+                <span>Lò Cao 3</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="diemDau" value="Lò Cao 4" />
+                <span>Lò Cao 4</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="diemDau" value="Lò Cao 5" />
+                <span>Lò Cao 5</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="diemDau" value="Lò Cao 6" />
+                <span>Lò Cao 6</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Điểm Đến -->
+          <div>
+            <label
+              style="
+                display: block;
+                margin-bottom: 12px;
+                color: var(--accent-cyan);
+                font-size: 0.85rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              "
+              >Điểm Đến</label
+            >
+            <div
+              class="radio-group"
+              style="gap: 8px; flex-direction: row; flex-wrap: wrap"
+            >
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="diemDen" value="Đúc gang" />
+                <span>Đúc gang</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="diemDen" value="HRC1" />
+                <span>HRC1</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="diemDen" value="HRC2" />
+                <span>HRC2</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="batDauVanChuyen()">
+          <span>Bắt Đầu Vận Chuyển</span>
+        </button>
+      </div>
+
+      <!-- VÙNG 2: GIÁM SÁT CÔNG ĐOẠN -->
+      <div class="section">
+        <h2 class="section-title">Sơ Đồ Vận Hành</h2>
+
+        <div class="stages-wrapper">
+          <!-- Công đoạn 1: Bắt đầu vận chuyển -->
+          <div class="stage-section" id="stage1" data-stage="1">
+            <div class="stage-header">
+              <div class="stage-icon">🚚</div>
+              <div class="stage-name">Hoàn thành vận chuyển</div>
+              <div class="stage-count">0</div>
+            </div>
+            <div class="stage-ladles" id="stage1-ladles">
+              <div class="empty-stage">Không có thùng gang</div>
+            </div>
+          </div>
+
+          <!-- Công đoạn 2: Vào gian chờ thép -->
+          <div class="stage-section" id="stage2" data-stage="2">
+            <div class="stage-header">
+              <div class="stage-icon">⏳</div>
+              <div class="stage-name">Vào gian chờ thép</div>
+              <div class="stage-count">0</div>
+            </div>
+            <div class="stage-ladles" id="stage2-ladles">
+              <div class="empty-stage">Không có thùng gang</div>
+            </div>
+          </div>
+
+          <!-- Công đoạn 3: Vào KR (chỉ HRC) -->
+          <div
+            class="stage-section"
+            id="stage3"
+            data-stage="3"
+            style="display: none"
+          >
+            <div class="stage-header">
+              <div class="stage-icon">🚪</div>
+              <div class="stage-name">Vào KR</div>
+              <div class="stage-count">0</div>
+            </div>
+            <div class="stage-ladles" id="stage3-ladles">
+              <div class="empty-stage">Không có thùng gang</div>
+            </div>
+          </div>
+
+          <!-- Công đoạn 4: Ra KR (chỉ HRC) -->
+          <div
+            class="stage-section"
+            id="stage4"
+            data-stage="4"
+            style="display: none"
+          >
+            <div class="stage-header">
+              <div class="stage-icon">🚶</div>
+              <div class="stage-name">Ra KR</div>
+              <div class="stage-count">0</div>
+            </div>
+            <div class="stage-ladles" id="stage4-ladles">
+              <div class="empty-stage">Không có thùng gang</div>
+            </div>
+          </div>
+
+          <!-- Công đoạn 5: Rót xong -->
+          <div class="stage-section" id="stage5" data-stage="5">
+            <div class="stage-header">
+              <div class="stage-icon">🔥</div>
+              <div class="stage-name">Rót xong</div>
+              <div class="stage-count">0</div>
+            </div>
+            <div class="stage-ladles" id="stage5-ladles">
+              <div class="empty-stage">Không có thùng gang</div>
+            </div>
+          </div>
+
+          <!-- Công đoạn 6 & 7: Ra luyện thép / Đúc gang -->
+          <div class="stage-section" id="stage6" data-stage="6">
+            <div class="stage-header">
+              <div class="stage-icon">✅</div>
+              <div class="stage-name">Hoàn tất (Ra LT / Đúc gang)</div>
+              <div class="stage-count">0</div>
+            </div>
+            <div class="stage-ladles" id="stage6-ladles">
+              <div class="empty-stage">Không có thùng gang</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VÙNG 3: LỊCH SỬ VẬN CHUYỂN -->
+      <div class="section">
+        <h2 class="section-title">Ghi Chép Gang</h2>
+
+        <!-- Bộ lọc ngày -->
+        <div class="filter-row">
+          <div class="filter-group">
+            <label for="filterFromDate">Từ ngày</label>
+            <input type="date" id="filterFromDate" />
+          </div>
+          <div class="filter-group">
+            <label for="filterToDate">Đến ngày</label>
+            <input type="date" id="filterToDate" />
+          </div>
+          <div class="filter-group wide">
+            <label for="filterThungSo">Số thùng</label>
+            <input
+              type="text"
+              id="filterThungSo"
+              placeholder="Nhập số thùng..."
+            />
+          </div>
+          <button onclick="filterHistory()" class="filter-btn">
+            <span>🔍 Lọc</span>
+          </button>
+          <button onclick="resetFilter()" class="filter-btn reset-btn">
+            <span>↻ Đặt lại</span>
+          </button>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <!-- <th>Ngày Tạo</th> -->
+                <th>Ngày SX</th>
+                <th>Ca SX</th>
+                <th>Thùng Số</th>
+                <th>Thứ Tự</th>
+                <th>Mẻ</th>
+                <th>Điểm Đầu</th>
+                <th>Điểm Đến</th>
+                <th>Khối Lượng (Tấn)</th>
+                <th>Nhiệt Độ Thùng (°C)</th>
+                <th>Giờ Bắt Đầu Rót</th>
+                <th>Giờ Rót Đầy Thùng</th>
+                <th>Giờ Bắt Đầu Vận Chuyển</th>
+                <th>Giờ Vào Gian Chờ Thép</th>
+                <th>Giờ Vào KR</th>
+                <th>Giờ Ra KR</th>
+                <th>Giờ Rót Xong (Trả Vỏ)</th>
+                <th>Giờ Ra Luyện Thép</th>
+                <th>Giờ Đúc Gang</th>
+                <th>Trạng Thái</th>
+                <th>Chi Tiết</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr>
+                <td colspan="21" class="no-data">Chưa có dữ liệu vận chuyển</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination">
+          <button onclick="previousPage()" id="prevBtn">« Trang trước</button>
+          <span class="page-info">
+            Trang <span id="currentPage">1</span> /
+            <span id="totalPages">1</span>
+          </span>
+          <button onclick="nextPage()" id="nextBtn">Trang sau »</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal xác nhận -->
+    <div class="modal-overlay" id="confirmModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-icon">✅</div>
+          <div class="modal-title">Xác Nhận Hoàn Tất Công Đoạn</div>
+        </div>
+        <div class="modal-body">
+          <!-- Thông tin thùng trên 1 hàng -->
+          <div
+            style="
+              text-align: center;
+              margin-bottom: 8px;
+              padding: 8px;
+              background: rgba(0, 217, 255, 0.08);
+              border-radius: 6px;
+              border: 1px solid rgba(0, 217, 255, 0.2);
+            "
+          >
+            <div
+              style="
+                font-size: 0.95rem;
+                color: var(--text-primary);
+                font-weight: 700;
+                font-family: &quot;Orbitron&quot;, sans-serif;
+              "
+            >
+              Thùng
+              <span id="modalThungSo" style="color: var(--accent-cyan)">-</span>
+              <span style="margin: 0 10px; color: var(--accent-cyan)">|</span>
+              <span id="modalDiemDau" style="color: var(--primary-orange)"
+                >-</span
+              >
+              <span
+                style="
+                  margin: 0 6px;
+                  color: var(--accent-cyan);
+                  font-size: 1rem;
+                "
+                >→</span
+              >
+              <span id="modalDiemDen" style="color: var(--success-green)"
+                >-</span
+              >
+            </div>
+          </div>
+
+          <!-- Thông tin TPHH -->
+          <div
+            id="tphhSection"
+            style="
+              margin-bottom: 8px;
+              padding: 8px;
+              background: rgba(255, 152, 0, 0.08);
+              border-radius: 6px;
+              border: 1px solid rgba(255, 152, 0, 0.2);
+            "
+          >
+            <div
+              style="
+                font-size: 0.8rem;
+                font-weight: 700;
+                color: var(--primary-orange);
+                margin-bottom: 5px;
+                text-align: center;
+              "
+            >
+              📊 THÔNG TIN THÀNH PHẦN HÓA HỌC
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+                gap: 4px;
+              "
+            >
+              <div
+                style="
+                  text-align: center;
+                  padding: 5px;
+                  background: rgba(0, 217, 255, 0.05);
+                  border-radius: 4px;
+                "
+              >
+                <div style="font-size: 0.65rem; color: var(--text-secondary)">
+                  Mẻ
+                </div>
+                <div
+                  id="tphhMe"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--accent-cyan);
+                    font-family: &quot;Orbitron&quot;, sans-serif;
+                  "
+                >
+                  -
+                </div>
+              </div>
+              <div
+                style="
+                  text-align: center;
+                  padding: 5px;
+                  background: rgba(0, 217, 255, 0.05);
+                  border-radius: 4px;
+                "
+              >
+                <div style="font-size: 0.65rem; color: var(--text-secondary)">
+                  Khối lượng
+                </div>
+                <div
+                  id="tphhKhoiLuong"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--accent-cyan);
+                    font-family: &quot;Orbitron&quot;, sans-serif;
+                  "
+                >
+                  -
+                </div>
+              </div>
+              <div
+                style="
+                  text-align: center;
+                  padding: 5px;
+                  background: rgba(0, 217, 255, 0.05);
+                  border-radius: 4px;
+                "
+              >
+                <div style="font-size: 0.65rem; color: var(--text-secondary)">
+                  Nhiệt độ thùng
+                </div>
+                <div
+                  id="tphhNhietDo"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--primary-orange);
+                    font-family: &quot;Orbitron&quot;, sans-serif;
+                  "
+                >
+                  -
+                </div>
+              </div>
+              <div
+                style="
+                  text-align: center;
+                  padding: 5px;
+                  background: rgba(0, 217, 255, 0.05);
+                  border-radius: 4px;
+                "
+              >
+                <div style="font-size: 0.65rem; color: var(--text-secondary)">
+                  C (%)
+                </div>
+                <div
+                  id="tphhC"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--success-green);
+                    font-family: &quot;Orbitron&quot;, sans-serif;
+                  "
+                >
+                  -
+                </div>
+              </div>
+              <div
+                style="
+                  text-align: center;
+                  padding: 5px;
+                  background: rgba(0, 217, 255, 0.05);
+                  border-radius: 4px;
+                "
+              >
+                <div style="font-size: 0.65rem; color: var(--text-secondary)">
+                  Si (%)
+                </div>
+                <div
+                  id="tphhSi"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--success-green);
+                    font-family: &quot;Orbitron&quot;, sans-serif;
+                  "
+                >
+                  -
+                </div>
+              </div>
+              <div
+                style="
+                  text-align: center;
+                  padding: 5px;
+                  background: rgba(0, 217, 255, 0.05);
+                  border-radius: 4px;
+                "
+              >
+                <div style="font-size: 0.65rem; color: var(--text-secondary)">
+                  Mn (%)
+                </div>
+                <div
+                  id="tphhMn"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--success-green);
+                    font-family: &quot;Orbitron&quot;, sans-serif;
+                  "
+                >
+                  -
+                </div>
+              </div>
+              <div
+                style="
+                  text-align: center;
+                  padding: 5px;
+                  background: rgba(0, 217, 255, 0.05);
+                  border-radius: 4px;
+                "
+              >
+                <div style="font-size: 0.65rem; color: var(--text-secondary)">
+                  P (%)
+                </div>
+                <div
+                  id="tphhP"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--success-green);
+                    font-family: &quot;Orbitron&quot;, sans-serif;
+                  "
+                >
+                  -
+                </div>
+              </div>
+              <div
+                style="
+                  text-align: center;
+                  padding: 5px;
+                  background: rgba(0, 217, 255, 0.05);
+                  border-radius: 4px;
+                "
+              >
+                <div style="font-size: 0.65rem; color: var(--text-secondary)">
+                  S (%)
+                </div>
+                <div
+                  id="tphhS"
+                  style="
+                    font-size: 0.85rem;
+                    font-weight: 700;
+                    color: var(--success-green);
+                    font-family: &quot;Orbitron&quot;, sans-serif;
+                  "
+                >
+                  -
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Timeline với mốc thời gian -->
+          <div class="modal-timeline-container">
+            <div class="modal-timeline" id="processTimeline">
+              <!-- Công đoạn 1 -->
+              <div class="timeline-step" data-stage="1">
+                <div class="timeline-step-icon">🚚</div>
+                <div class="timeline-step-label">Bắt đầu vận chuyển</div>
+                <div class="timeline-step-time" id="timeStage1">-</div>
+              </div>
+
+              <div class="timeline-arrow">→</div>
+
+              <!-- Công đoạn 2 -->
+              <div class="timeline-step" data-stage="2">
+                <div class="timeline-step-icon">⏳</div>
+                <div class="timeline-step-label">Vào gian chờ thép</div>
+                <div class="timeline-step-time" id="timeStage2">-</div>
+              </div>
+
+              <div class="timeline-arrow">→</div>
+
+              <!-- Công đoạn 3 (HRC only) -->
+              <div class="timeline-step" data-stage="3" style="display: none">
+                <div class="timeline-step-icon">🚪</div>
+                <div class="timeline-step-label">Vào KR</div>
+                <div class="timeline-step-time" id="timeStage3">-</div>
+              </div>
+
+              <div class="timeline-arrow" id="arrow3" style="display: none">
+                →
+              </div>
+
+              <!-- Công đoạn 4 (HRC only) -->
+              <div class="timeline-step" data-stage="4" style="display: none">
+                <div class="timeline-step-icon">🚶</div>
+                <div class="timeline-step-label">Ra KR</div>
+                <div class="timeline-step-time" id="timeStage4">-</div>
+              </div>
+
+              <div class="timeline-arrow" id="arrow4" style="display: none">
+                →
+              </div>
+
+              <!-- Công đoạn 5 -->
+              <div class="timeline-step" data-stage="5">
+                <div class="timeline-step-icon">🔥</div>
+                <div class="timeline-step-label">Rót xong</div>
+                <div class="timeline-step-time" id="timeStage5">-</div>
+              </div>
+
+              <div class="timeline-arrow">→</div>
+
+              <!-- Công đoạn 6 -->
+              <div class="timeline-step" data-stage="6">
+                <div class="timeline-step-icon">✅</div>
+                <div class="timeline-step-label">Ra luyện thép</div>
+                <div class="timeline-step-time" id="timeStage6">-</div>
+              </div>
+
+              <div class="timeline-arrow">→</div>
+
+              <!-- Công đoạn 7 -->
+              <!-- <div class="timeline-step" data-stage="7">
+                <div class="timeline-step-icon">🏭</div>
+                <div class="timeline-step-label">Đúc gang</div>
+                <div class="timeline-step-time" id="timeStage7">-</div>
+              </div> -->
+            </div>
+
+            <!-- Mô tả chi tiết -->
+            <div class="modal-description-area">
+              <!-- Ghi chú tình trạng công đoạn -->
+              <div class="status-note-box" id="stageStatusNote">
+                <div class="status-note-title">📋 Tình trạng hiện tại:</div>
+                <div class="status-note-content" id="stageStatusDescription">
+                  -
+                </div>
+              </div>
+
+              <!-- Ghi chú hành động xác nhận -->
+              <div class="action-note-box" id="confirmActionNote">
+                <div class="action-note-title">✅ Hành động khi xác nhận:</div>
+                <div class="action-note-content" id="confirmActionDescription">
+                  -
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Xác nhận tiếp tục chu kỳ (Công đoạn 4) -->
+          <div id="stage4NextDestination">
+            <!-- <label
+              style="
+                display: block;
+                margin-bottom: 12px;
+                color: #4caf50;
+                font-size: 0.85rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+              "
+              >♻️ Chọn Điểm Đến Chu Kỳ Tiếp Theo</label
+            > -->
+
+            <!-- <p
+              style="
+                margin-bottom: 15px;
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+              "
+            >
+              Thùng gang <strong id="stage4LaundleName">-</strong> sẽ được gửi
+              đến:
+            </p> -->
+
+            <!-- <div class="radio-group" style="gap: 10px; flex-direction: column">
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="nextDestination" value="Lò Cao 1" />
+                <span style="font-weight: 500">🔥 Lò Cao 1</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="nextDestination" value="Lò Cao 2" />
+                <span style="font-weight: 500">🔥 Lò Cao 2</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="nextDestination" value="Lò Cao 3" />
+                <span style="font-weight: 500">🔥 Lò Cao 3</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="nextDestination" value="Lò Cao 4" />
+                <span style="font-weight: 500">🔥 Lò Cao 4</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="nextDestination" value="Lò Cao 5" />
+                <span style="font-weight: 500">🔥 Lò Cao 5</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="nextDestination" value="Lò Cao 6" />
+                <span style="font-weight: 500">🔥 Lò Cao 6</span>
+              </label>
+              <label class="radio-label" style="margin-bottom: 0">
+                <input type="radio" name="nextDestination" value="Bảo Dưỡng" />
+                <span style="font-weight: 500">🛠️ Bảo Dưỡng</span>
+              </label>
+            </div> -->
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button
+            class="modal-btn modal-btn-cancel"
+            onclick="closeConfirmModal()"
+          >
+            ✕ Hủy
+          </button>
+          <button
+            class="modal-btn modal-btn-cancel"
+            onclick="showEditModal()"
+            id="editBtn"
+            style="
+              background: linear-gradient(135deg, #ff9800, #fb8c00);
+              border: none;
+              color: white;
+            "
+          >
+            ✏️ Chỉnh Sửa
+          </button>
+          <button
+            class="modal-btn modal-btn-confirm"
+            id="confirmKRBtn"
+            onclick="confirmEnterKR()"
+            style="
+              background: linear-gradient(135deg, #9c27b0, #7b1fa2);
+              border: none;
+              color: white;
+              display: none;
+            "
+          >
+            🔥 Xác Nhận Vào KR
+          </button>
+          <button
+            class="modal-btn modal-btn-confirm"
+            onclick="confirmCompleteStage()"
+          >
+            ✓ Xác Nhận Hoàn Tất
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal chỉnh sửa thông tin thùng -->
+    <div class="modal-overlay" id="editModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div
+            class="modal-icon"
+            style="background: linear-gradient(135deg, #ff9800, #fb8c00)"
+          >
+            ✏️
+          </div>
+          <div class="modal-title">Chỉnh Sửa Thông Tin Thùng</div>
+        </div>
+        <div class="modal-body">
+          <div>
+            <!-- Số Thùng Gang -->
+            <div>
+              <label
+                style="
+                  display: block;
+                  margin-bottom: 12px;
+                  color: var(--text-muted);
+                  font-size: 0.85rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 1px;
+                "
+                >Số Thùng Gang</label
+              >
+              <input
+                type="text"
+                id="editSoThung"
+                placeholder="VD: 01"
+                style="width: 100%"
+              />
+            </div>
+
+            <!-- Điểm Đầu -->
+            <div>
+              <label
+                style="
+                  display: block;
+                  margin-bottom: 12px;
+                  color: var(--accent-cyan);
+                  font-size: 0.85rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 1px;
+                "
+                >Điểm Đầu</label
+              >
+              <div
+                class="radio-group"
+                style="gap: 8px; flex-direction: row; flex-wrap: wrap"
+              >
+                <label class="radio-label" style="margin-bottom: 0">
+                  <input type="radio" name="editDiemDau" value="Lò Cao 1" />
+                  <span style="width: 100px">Lò Cao 1</span>
+                </label>
+                <label class="radio-label" style="margin-bottom: 0">
+                  <input type="radio" name="editDiemDau" value="Lò Cao 2" />
+                  <span style="width: 100px">Lò Cao 2</span>
+                </label>
+                <label class="radio-label" style="margin-bottom: 0">
+                  <input type="radio" name="editDiemDau" value="Lò Cao 3" />
+                  <span style="width: 100px">Lò Cao 3</span>
+                </label>
+                <label class="radio-label" style="margin-bottom: 0">
+                  <input type="radio" name="editDiemDau" value="Lò Cao 4" />
+                  <span style="width: 100px">Lò Cao 4</span>
+                </label>
+                <label class="radio-label" style="margin-bottom: 0">
+                  <input type="radio" name="editDiemDau" value="Lò Cao 5" />
+                  <span style="width: 100px">Lò Cao 5</span>
+                </label>
+                <label class="radio-label" style="margin-bottom: 0">
+                  <input type="radio" name="editDiemDau" value="Lò Cao 6" />
+                  <span style="width: 100px">Lò Cao 6</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Điểm Đến -->
+            <div>
+              <label
+                style="
+                  display: block;
+                  margin-bottom: 12px;
+                  color: var(--accent-cyan);
+                  font-size: 0.85rem;
+                  font-weight: 600;
+                  text-transform: uppercase;
+                  letter-spacing: 1px;
+                "
+                >Điểm Đến</label
+              >
+              <div
+                class="radio-group"
+                style="gap: 8px; flex-direction: row; flex-wrap: wrap"
+              >
+                <label class="radio-label" style="margin-bottom: 0">
+                  <input type="radio" name="editDiemDen" value="Đúc gang" />
+                  <span>Đúc gang</span>
+                </label>
+                <label class="radio-label" style="margin-bottom: 0">
+                  <input type="radio" name="editDiemDen" value="HRC1" />
+                  <span>HRC1</span>
+                </label>
+                <label class="radio-label" style="margin-bottom: 0">
+                  <input type="radio" name="editDiemDen" value="HRC2" />
+                  <span>HRC2</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn modal-btn-cancel" onclick="closeEditModal()">
+            ✕ Hủy
+          </button>
+          <button class="modal-btn modal-btn-confirm" onclick="saveEdit()">
+            ✓ Lưu Thay Đổi
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal xóa thùng -->
+    <div class="modal-overlay" id="deleteModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div
+            class="modal-icon"
+            style="background: linear-gradient(135deg, #ff0000, #cc0000)"
+          >
+            🗑️
+          </div>
+          <div class="modal-title" style="color: #ff6b6b">
+            Xác Nhận Xóa Thùng
+          </div>
+        </div>
+        <div class="modal-body">
+          <div class="modal-info">
+            <div class="modal-info-row">
+              <span class="modal-info-label">Số thùng:</span>
+              <span class="modal-info-value" id="deleteModalThungSo">-</span>
+            </div>
+            <div class="modal-info-row">
+              <span class="modal-info-label">Điểm đầu:</span>
+              <span class="modal-info-value" id="deleteModalDiemDau">-</span>
+            </div>
+            <div class="modal-info-row">
+              <span class="modal-info-label">Điểm đến:</span>
+              <span class="modal-info-value" id="deleteModalDiemDen">-</span>
+            </div>
+            <div class="modal-info-row">
+              <span class="modal-info-label">Công đoạn:</span>
+              <span class="modal-info-value" id="deleteModalStage">-</span>
+            </div>
+          </div>
+          <div
+            style="
+              margin-top: 20px;
+              padding: 15px;
+              background: rgba(255, 0, 0, 0.1);
+              border: 2px solid rgba(255, 0, 0, 0.3);
+              border-radius: 8px;
+              text-align: center;
+            "
+          >
+            <p style="color: #ff6b6b; font-weight: 600; margin: 0">
+              ⚠️ Bạn có chắc chắn muốn xóa thùng này?
+            </p>
+            <p
+              style="
+                color: var(--text-muted);
+                font-size: 0.9rem;
+                margin: 8px 0 0 0;
+              "
+            >
+              Hành động này không thể hoàn tác!
+            </p>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button
+            class="modal-btn modal-btn-cancel"
+            onclick="closeDeleteModal()"
+          >
+            ✕ Hủy
+          </button>
+          <button
+            class="modal-btn modal-btn-confirm"
+            style="background: linear-gradient(135deg, #ff0000, #cc0000)"
+            onclick="confirmDelete()"
+          >
+            🗑️ Xác Nhận Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal đăng nhập -->
+    <div class="modal-overlay" id="loginModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-icon">🔐</div>
+          <div class="modal-title">Nhập mã vận hành</div>
+        </div>
+
+        <div class="modal-body">
+          <div class="input-group">
+            <label>Mã đăng nhập</label>
+            <input id="loginCode" />
+          </div>
+
+          <p
+            style="
+              margin-top: 12px;
+              color: var(--text-muted);
+              font-size: 0.85rem;
+            "
+          >
+            • TRƯỞNG KÍP: Phân bổ thùng<br />
+            • ĐIỀU ĐỘ: Chỉ xử lý chuyển thùng <br />
+            • VIEW: Chỉ xem, không thao tác<br />
+            • LOCAO1 - LOCAO6: Xem dữ liệu của Lò Cao tương ứng<br />
+            • HRC1, HRC2: Xem dữ liệu thùng vào HRC tương ứng
+          </p>
+        </div>
+
+        <div class="modal-actions">
+          <button
+            class="modal-btn modal-btn-confirm"
+            onclick="submitLoginCode()"
+          >
+            ✓ Xác nhận
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let transports = [];
+      let history = [];
+      let filteredHistory = [];
+      let transportId = 0;
+      let pendingTransportId = null;
+      let pendingDeleteId = null;
+      let autoRefreshTimer = null;
+      let isRefreshing = false;
+
+      // Pagination variables
+      let currentPageNum = 1;
+      let itemsPerPage = 20;
+      let totalItems = 0;
+
+      const STAGES = [
+        { id: 1, name: "Bắt đầu vận chuyển", icon: "🚚", duration: 10 },
+        { id: 2, name: "Vào gian chờ thép", icon: "⏳", duration: 15 },
+        { id: 3, name: "Vào KR", icon: "🚪", duration: 20, hrcOnly: true },
+        { id: 4, name: "Ra KR", icon: "🚶", duration: 15, hrcOnly: true },
+        { id: 5, name: "Rót xong", icon: "🔥", duration: 20 },
+        { id: 6, name: "Ra luyện thép", icon: "✅", duration: 12 },
+        { id: 7, name: "Đúc gang", icon: "🏭", duration: 10 },
+      ];
+
+      /**
+       * Lấy thời gian hiện tại theo múi giờ Việt Nam (UTC+7)
+       * @returns {Date} Đối tượng Date với thời gian VN
+       */
+      function getCurrentTimeVN() {
+        return new Date(Date.now() + 7 * 60 * 60 * 1000);
+      }
+
+      /**
+       * Chuyển đổi Date object sang chuỗi ISO string
+       * @param {Date} date - Đối tượng Date cần chuyển đổi
+       * @returns {string} Chuỗi ISO format
+       */
+      function getISOStringVN(date = new Date()) {
+        return new Date(date.getTime()).toISOString();
+      }
+
+      // Khởi tạo ngày mặc định cho bộ lọc
+      window.onload = function () {
+        const today = getCurrentTimeVN();
+        const year = today.getUTCFullYear();
+        const month = String(today.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(today.getUTCDate()).padStart(2, "0");
+        const todayStr = `${year}-${month}-${day}`;
+        document.getElementById("filterFromDate").value = todayStr;
+        document.getElementById("filterToDate").value = todayStr;
+      };
+
+      /**
+       * Xử lý phân bổ vận chuyển thùng gang mới
+       * - Validate thông tin nhập (số thùng, điểm đầu, điểm đến)
+       * - Gọi API tạo nhật trình vận chuyển
+       * - Thêm thùng mới vào sơ đồ vận hành
+       * @async
+       */
+      async function batDauVanChuyen() {
+        const soThung = document.getElementById("soThung").value.trim();
+        const diemDau =
+          document.querySelector('input[name="diemDau"]:checked')?.value || "";
+        const diemDen =
+          document.querySelector('input[name="diemDen"]:checked')?.value || "";
+
+        if (!soThung || !diemDau || !diemDen) {
+          alert("⚠️ Vui lòng điền đầy đủ thông tin!");
+          return;
+        }
+
+        try {
+          // 🔹 POST API tạo nhật trình
+          const created = await postPhanBoVanChuyen({
+            soThung,
+            diemDau,
+            diemDen,
+          });
+
+          // 🔹 Sau khi tạo thành công → add vào sơ đồ vận hành
+          const startTime = parseDateSafe(created.NgayTao) || new Date();
+
+          transports.push({
+            id: created.ID,
+            soThung: created.SoThung,
+            diemDau: created.DiemDau ?? "",
+            diemDen: created.DiemDen ?? "",
+            currentStage: 1,
+            stageStartTime: startTime,
+            stageStatus: "processing",
+            stageTimes: {
+              stage1: startTime,
+              stage2: null,
+              stage3: null,
+              stage4: null,
+              stage5: null,
+              stage6: null,
+              stage7: null,
+            },
+            tphh: {
+              me: created.Me ?? "-",
+              khoiLuong: created.KhoiLuong ?? null,
+              nhietDoThung: created.NhietDoThung ?? "-",
+              c: created.C ?? "-",
+              si: created.Si ?? "-",
+              mn: created.Mn ?? "-",
+              p: created.P ?? "-",
+              s: created.S ?? "-",
+            },
+          });
+
+          updateDisplay();
+
+          // BẮT BUỘC GỌI
+          processStage(created.ID);
+
+          // reset input
+          document.getElementById("soThung").value = "";
+          // Reset radio buttons
+          document
+            .querySelectorAll('input[name="diemDau"]')
+            .forEach((radio) => (radio.checked = false));
+          document
+            .querySelectorAll('input[name="diemDen"]')
+            .forEach((radio) => (radio.checked = false));
+        } catch (err) {
+          console.error("POST error:", err);
+
+          // Thông báo nghiệp vụ từ backend
+          alert(err?.message || "❌ Không thể phân bổ vận chuyển");
+        }
+      }
+
+      /**
+       * Xử lý tiến trình công đoạn cho thùng gang
+       * - Tính thời gian xử lý dựa trên độ dài công đoạn
+       * - Tự động chuyển trạng thái sang "chờ xác nhận" khi hết thời gian
+       * @param {number} transportId - ID của thùng gang cần xử lý
+       */
+      function processStage(transportId) {
+        console.log("Processing transport ID:", transportId);
+        const transport = transports.find((t) => t.id === transportId);
+        if (!transport) return;
+
+        const stage = STAGES.find((s) => s.id === transport.currentStage);
+        const duration = stage.duration * 1000; // Chuyển sang milliseconds
+
+        // Sau khi hết thời gian xử lý, chuyển sang trạng thái chờ xác nhận
+        setTimeout(() => {
+          // const existingTransport = transports.find(
+          //   (t) => t.id === transportId
+          // );
+          // if (
+          //   existingTransport &&
+          //   existingTransport.stageStatus === "processing"
+          // ) {
+          //   existingTransport.stageStatus = "waiting-confirm";
+          //   updateDisplay();
+          // }
+          const t = transports.find((x) => x.id === transportId);
+          if (!t) return;
+
+          // ❌ KHÔNG CHUYỂN STAGE
+          // ❌ KHÔNG GHI TIME
+
+          t.stageStatus = "waiting-confirm"; // ✅ CHỈ ĐỔI TRẠNG THÁI
+          updateDisplay();
+        }, duration);
+      }
+
+      /**
+       * Hiển thị modal xác nhận quay lại công đoạn trước
+       * - Cho phép rollback khi xác nhận nhầm công đoạn
+       * @param {number} transportId - ID của thùng gang cần rollback
+       * @param {Event} event - Sự kiện click để ngăn propagation
+       */
+      function showRollbackModal(transportId, event) {
+        event.stopPropagation();
+
+        if (!window.__CAN_CONFIRM_STAGE__) {
+          alert("⚠️ Bạn không có quyền quay lại công đoạn");
+          return;
+        }
+
+        const transport = transports.find((t) => t.id === transportId);
+        if (!transport) return;
+
+        if (transport.currentStage <= 1) {
+          alert("⚠️ Không thể quay lại từ công đoạn đầu tiên!");
+          return;
+        }
+
+        const currentStage = STAGES.find(
+          (s) => s.id === transport.currentStage,
+        );
+        const previousStage = STAGES.find(
+          (s) => s.id === transport.currentStage - 1,
+        );
+
+        const confirmMsg =
+          `🔄 XÁC NHẬN QUAY LẠI CÔNG ĐOẠN TRƯỚC\n\n` +
+          `Thùng: ${transport.soThung}\n` +
+          `Từ: ${currentStage.icon} ${currentStage.name}\n` +
+          `Về: ${previousStage.icon} ${previousStage.name}\n\n` +
+          `⚠️ Hành động này sẽ xóa mốc thời gian của công đoạn hiện tại.\n\n` +
+          `Bạn có chắc chắn muốn tiếp tục?`;
+
+        if (!confirm(confirmMsg)) return;
+
+        confirmRollback(transportId);
+      }
+
+      /**
+       * Xác nhận quay lại công đoạn trước
+       * - Gọi API xóa mốc thời gian công đoạn hiện tại
+       * - Cập nhật local state
+       * @async
+       * @param {number} transportId - ID của thùng gang
+       */
+      async function confirmRollback(transportId) {
+        const transport = transports.find((t) => t.id === transportId);
+        if (!transport || transport.currentStage <= 1) return;
+
+        try {
+          const currentStage = transport.currentStage;
+
+          // 🔹 Payload cơ bản
+          let payload = {
+            SoThung: transport.soThung,
+            DiemDau: transport.diemDau,
+            DiemDen: transport.diemDen,
+          };
+
+          // 🔹 Xóa mốc thời gian công đoạn hiện tại (gửi chuỗi rỗng)
+          switch (currentStage) {
+            case 2:
+              payload.GioVaoLT = "0001-01-01T00:00:00";
+              break;
+            case 3:
+              payload.GioVaoKR = "0001-01-01T00:00:00";
+              break;
+            case 4:
+              payload.GioRaKR = "0001-01-01T00:00:00";
+              break;
+            case 5:
+              payload.GioRotXong = "0001-01-01T00:00:00";
+              break;
+            case 6:
+              payload.GioRaLT = "0001-01-01T00:00:00";
+              payload.GioDucGang = "0001-01-01T00:00:00";
+              payload.TinhTrang = 0;
+              break;
+          }
+
+          console.log("🔄 Rollback payload:", payload);
+
+          // 🔹 Gọi API update để xóa mốc thời gian
+          const response = await updateGangNhatTrinh(transport.id, payload);
+          console.log("✅ Rollback API response:", response);
+
+          // 🔹 Cập nhật local state
+          transport.currentStage = currentStage - 1;
+          transport.stageTimes[`stage${currentStage}`] = null;
+          transport.stageStartTime =
+            transport.stageTimes[`stage${currentStage - 1}`] ||
+            getCurrentTimeVN();
+          transport.stageStatus = "waiting-confirm";
+
+          updateDisplay();
+
+          const previousStageName = STAGES[currentStage - 2].name;
+          alert(
+            `✅ Đã quay lại công đoạn "${previousStageName}".\nMốc thời gian công đoạn ${currentStage} đã được xóa.`,
+          );
+        } catch (err) {
+          console.error("❌ Rollback error:", err);
+          alert(
+            err?.message ||
+              "❌ Không thể quay lại công đoạn trước. Vui lòng thử lại.",
+          );
+        }
+      }
+
+      /**
+       * Hiển thị modal xác nhận xóa thùng gang
+       * - Chỉ cho phép xóa thùng ở công đoạn 1 (Bắt đầu vận chuyển)
+       * @param {number} transportId - ID của thùng gang cần xóa
+       * @param {Event} event - Sự kiện click để ngăn propagation
+       */
+      function showDeleteModal(transportId, event) {
+        event.stopPropagation(); // Ngăn sự kiện click lan sang ladle-item
+
+        const transport = transports.find((t) => t.id === transportId);
+        if (!transport) return;
+
+        // Chỉ cho phép xóa khi ở công đoạn 1 (Bắt đầu vận chuyển)
+        if (transport.currentStage !== 1) {
+          alert(
+            '⚠️ Chỉ có thể xóa thùng đang ở công đoạn "Bắt đầu vận chuyển"!',
+          );
+          return;
+        }
+
+        pendingDeleteId = transportId;
+
+        // Cập nhật thông tin modal
+        document.getElementById("deleteModalThungSo").textContent =
+          transport.soThung;
+        document.getElementById("deleteModalDiemDau").textContent =
+          transport.diemDau;
+        document.getElementById("deleteModalDiemDen").textContent =
+          transport.diemDen;
+
+        const currentStage = STAGES.find(
+          (s) => s.id === transport.currentStage,
+        );
+        const statusText =
+          transport.stageStatus === "processing"
+            ? "(Đang xử lý)"
+            : "(Chờ xác nhận)";
+        document.getElementById("deleteModalStage").textContent =
+          `${currentStage.icon} ${currentStage.name} ${statusText}`;
+
+        // Hiển thị modal
+        document.getElementById("deleteModal").classList.add("show");
+      }
+
+      /**
+       * Đóng modal xác nhận xóa thùng gang
+       */
+      function closeDeleteModal() {
+        document.getElementById("deleteModal").classList.remove("show");
+        pendingDeleteId = null;
+      }
+
+      /**
+       * Xác nhận xóa thùng gang
+       * - Xóa khỏi danh sách transports
+       * - Cập nhật lại giao diện
+       */
+      function confirmDelete() {
+        if (pendingDeleteId === null) return;
+
+        // Xóa transport khỏi danh sách
+        transports = transports.filter((t) => t.id !== pendingDeleteId);
+
+        updateDisplay();
+        closeDeleteModal();
+      }
+
+      /**
+       * Hiển thị modal xác nhận hoàn thành công đoạn
+       * - Kiểm tra quyền xác nhận (Trưởng kíp hoặc Điều độ)
+       * - Hiển thị thông tin thùng và công đoạn hiện tại
+       * - Cho phép chỉnh sửa thời gian xác nhận
+       * @param {number} transportId - ID của thùng gang cần xác nhận
+       */
+      function showConfirmModal(transportId) {
+        const transport = transports.find((t) => t.id === transportId);
+        if (!transport) return;
+
+        // 🔹 Công đoạn 6: Không cần chờ xác nhận, có thể click vào bất kỳ lúc nào
+        // 🔹 Các công đoạn khác: Phải ở trạng thái "waiting-confirm"
+        if (
+          transport.currentStage !== 6 &&
+          transport.stageStatus !== "waiting-confirm"
+        ) {
+          alert("⚠️ Vui lòng đợi công đoạn hoàn tất trước khi xác nhận!");
+          return;
+        }
+
+        pendingTransportId = transportId;
+
+        // Cập nhật thông tin modal
+        document.getElementById("modalThungSo").textContent = transport.soThung;
+        document.getElementById("modalDiemDau").textContent = transport.diemDau;
+        document.getElementById("modalDiemDen").textContent = transport.diemDen;
+
+        // 🔹 Hiển thị mốc thời gian cho từng công đoạn
+        const isHRC =
+          transport.diemDen === "HRC1" || transport.diemDen === "HRC2";
+
+        // Hiển thị/ẩn công đoạn KR cho HRC
+        const stage3 = document.querySelector('.timeline-step[data-stage="3"]');
+        const stage4 = document.querySelector('.timeline-step[data-stage="4"]');
+        const arrow3 = document.getElementById("arrow3");
+        const arrow4 = document.getElementById("arrow4");
+
+        if (isHRC) {
+          if (stage3) stage3.style.display = "";
+          if (stage4) stage4.style.display = "";
+          if (arrow3) arrow3.style.display = "";
+          if (arrow4) arrow4.style.display = "";
+        } else {
+          if (stage3) stage3.style.display = "none";
+          if (stage4) stage4.style.display = "none";
+          if (arrow3) arrow3.style.display = "none";
+          if (arrow4) arrow4.style.display = "none";
+        }
+
+        // Cập nhật mốc thời gian cho từng công đoạn
+        document.getElementById("timeStage1").textContent = formatTime(
+          transport.stageTimes.stage1,
+        );
+        document.getElementById("timeStage2").textContent = formatTime(
+          transport.stageTimes.stage2,
+        );
+        document.getElementById("timeStage3").textContent = formatTime(
+          transport.stageTimes.stage3,
+        );
+        document.getElementById("timeStage4").textContent = formatTime(
+          transport.stageTimes.stage4,
+        );
+        document.getElementById("timeStage5").textContent = formatTime(
+          transport.stageTimes.stage5,
+        );
+        document.getElementById("timeStage6").textContent = formatTime(
+          transport.stageTimes.stage6,
+        );
+        // document.getElementById("timeStage7").textContent = formatTime(
+        //   transport.stageTimes.stage7,
+        // );
+
+        // 🔹 Cập nhật thông tin TPHH
+        if (transport.tphh) {
+          document.getElementById("tphhMe").textContent =
+            transport.tphh.me || "-";
+          document.getElementById("tphhKhoiLuong").textContent = transport.tphh
+            .khoiLuong
+            ? transport.tphh.khoiLuong.toFixed(2) + " tấn"
+            : "-";
+          document.getElementById("tphhNhietDo").textContent =
+            transport.tphh.nhietDoThung !== "-"
+              ? transport.tphh.nhietDoThung + "°C"
+              : "-";
+          document.getElementById("tphhC").textContent =
+            transport.tphh.c || "-";
+          document.getElementById("tphhSi").textContent =
+            transport.tphh.si || "-";
+          document.getElementById("tphhMn").textContent =
+            transport.tphh.mn || "-";
+          document.getElementById("tphhP").textContent =
+            transport.tphh.p || "-";
+          document.getElementById("tphhS").textContent =
+            transport.tphh.s || "-";
+        } else {
+          // Reset nếu không có dữ liệu
+          document.getElementById("tphhMe").textContent = "-";
+          document.getElementById("tphhKhoiLuong").textContent = "-";
+          document.getElementById("tphhNhietDo").textContent = "-";
+          document.getElementById("tphhC").textContent = "-";
+          document.getElementById("tphhSi").textContent = "-";
+          document.getElementById("tphhMn").textContent = "-";
+          document.getElementById("tphhP").textContent = "-";
+          document.getElementById("tphhS").textContent = "-";
+        }
+
+        // 🔹 Highlight công đoạn hiện tại trên timeline
+        document.querySelectorAll(".timeline-step").forEach((step) => {
+          step.classList.remove("active");
+        });
+        const currentTimelineStep = document.querySelector(
+          `.timeline-step[data-stage="${transport.currentStage}"]`,
+        );
+        if (currentTimelineStep) {
+          currentTimelineStep.classList.add("active");
+        }
+
+        // 🔹 RULE: Nếu điểm đến = "Đúc gang" ở công đoạn 1 → Hoàn tất ngay
+        const isDucGang =
+          transport.diemDen === "Đúc gang" || transport.diemDen === "DUCGANG";
+        const isStage1 = transport.currentStage === 1;
+
+        // 🔹 Hiển thị/ẩn nút Edit (chỉ ở công đoạn 1 và có quyền)
+        const editBtn = document.getElementById("editBtn");
+        if (transport.currentStage === 1 && window.__CAN_CONFIRM_STAGE__) {
+          editBtn.style.display = "block";
+        } else {
+          editBtn.style.display = "none";
+        }
+
+        // 🔹 Hiển thị/ẩn nút Xác nhận vào KR (chỉ ở công đoạn 2 và điểm đến là HRC1/HRC2 và có quyền)
+        const confirmKRBtn = document.getElementById("confirmKRBtn");
+        if (
+          transport.currentStage === 2 &&
+          isHRC &&
+          window.__CAN_CONFIRM_STAGE__
+        ) {
+          confirmKRBtn.style.display = "block";
+        } else {
+          confirmKRBtn.style.display = "none";
+        }
+
+        // 🔹 Hiển thị/ẩn vùng chọn chu kỳ tiếp theo (chỉ ở công đoạn 6)
+        // const stage4Section = document.getElementById("stage4NextDestination");
+        const modalBody = document.querySelector(".modal-body");
+        if (transport.currentStage === 6) {
+          // stage4Section.style.display = "block";
+          modalBody.style.display = "flex"; // ✅ Vẫn hiển thị thông tin hành trình
+          // Cập nhật tên thùng trong vùng stage 6
+          // document.getElementById("stage4LaundleName").textContent =
+          //   transport.soThung;
+          // Reset radio buttons
+          document
+            .querySelectorAll('input[name="nextDestination"]')
+            .forEach((radio) => {
+              radio.checked = false;
+            });
+        } else {
+          // stage4Section.style.display = "none";
+          modalBody.style.display = "flex";
+        }
+
+        // 🔹 Cập nhật ghi chú tình trạng và hành động theo công đoạn
+        const stageStatusDesc = document.getElementById(
+          "stageStatusDescription",
+        );
+        const confirmActionDesc = document.getElementById(
+          "confirmActionDescription",
+        );
+
+        switch (transport.currentStage) {
+          case 1:
+            stageStatusDesc.innerHTML =
+              "🚚 Thùng gang đang trong quá trình <strong>vận chuyển từ " +
+              transport.diemDau +
+              " đến " +
+              transport.diemDen +
+              "</strong>.<br>" +
+              "Xe đang di chuyển thùng gang đến khu vực luyện thép.";
+            confirmActionDesc.innerHTML =
+              "Xác nhận khi thùng gang <strong>đã đến gian chờ thép</strong> và sẵn sàng cho công đoạn tiếp theo.<br>" +
+              "Sau khi xác nhận, hệ thống sẽ ghi nhận thời gian thùng vào gian chờ.";
+            break;
+
+          case 2:
+            stageStatusDesc.innerHTML =
+              "⏳ Thùng gang đã đến và đang <strong>chờ tại gian chờ thép</strong>.<br>" +
+              "Thùng đang chờ đến lượt được đưa vào luyện thép.";
+            confirmActionDesc.innerHTML =
+              "Xác nhận khi <strong>đã rót gang xong</strong> vào lò luyện thép và sẵn sàng trả vỏ thùng.<br>" +
+              "Sau khi xác nhận, thùng sẽ chuyển sang công đoạn trả vỏ.";
+            break;
+
+          case 3:
+            stageStatusDesc.innerHTML =
+              "🔥 Thùng gang đã <strong>rót xong</strong> vào lò luyện thép.<br>" +
+              "Thùng trống đang chờ được vận chuyển ra khỏi khu vực luyện thép.";
+            confirmActionDesc.innerHTML =
+              "Xác nhận khi thùng trống <strong>đã ra khỏi khu vực luyện thép</strong>.<br>" +
+              "Sau khi xác nhận, thùng sẽ hoàn tất quy trình và sẵn sàng cho chu kỳ mới.";
+            break;
+
+          case 3:
+            stageStatusDesc.innerHTML =
+              "🚪 Thùng gang đã <strong>vào KR</strong>.<br>" +
+              "Thùng đang trong quá trình xử lý tại KR.";
+            confirmActionDesc.innerHTML =
+              "Xác nhận khi thùng <strong>đã ra khỏi KR</strong>.<br>" +
+              "Sau khi xác nhận, thùng sẽ chuyển sang công đoạn rót gang.";
+            break;
+
+          case 4:
+            stageStatusDesc.innerHTML =
+              "🚶 Thùng gang đã <strong>ra KR</strong>.<br>" +
+              "Thùng đang di chuyển đến vị trí rót gang.";
+            confirmActionDesc.innerHTML =
+              "Xác nhận khi <strong>đã rót gang xong</strong> vào lò luyện thép.<br>" +
+              "Sau khi xác nhận, thùng sẽ chuyển sang công đoạn trả vỏ.";
+            break;
+
+          case 5:
+            stageStatusDesc.innerHTML =
+              "🔥 Thùng gang đã <strong>rót xong</strong> vào lò luyện thép.<br>" +
+              "Thùng trống đang chờ được vận chuyển ra khỏi khu vực luyện thép.";
+            confirmActionDesc.innerHTML =
+              "Xác nhận khi thùng trống <strong>đã ra khỏi khu vực luyện thép</strong>.<br>" +
+              "Sau khi xác nhận, thùng sẽ hoàn tất và sẵn sàng cho chu kỳ mới.";
+            break;
+
+          case 6:
+            stageStatusDesc.innerHTML =
+              "✅ Thùng gang đã <strong>hoàn tất hành trình</strong>.<br>" +
+              "Thùng sẵn sàng cho chu kỳ vận chuyển tiếp theo hoặc đúc gang.";
+            confirmActionDesc.innerHTML =
+              "Chọn điểm đến cho chu kỳ tiếp theo (Lò Cao 1-6, Bảo Dưỡng) hoặc Đúc gang.<br>" +
+              "Sau khi xác nhận, thùng sẽ được ghi nhận hoàn tất vào hệ thống.";
+            break;
+        }
+
+        // 🔹 Ẩn/hiện nút hoàn tất dựa trên quyền
+        const canConfirm = window.__CAN_CONFIRM_STAGE__;
+        const confirmCompleteBtn = document.querySelector(
+          "#confirmModal .modal-actions .modal-btn-confirm:not(#confirmKRBtn)",
+        );
+
+        // Nếu không có quyền, ẩn nút hoàn tất
+        if (!canConfirm) {
+          if (confirmCompleteBtn) confirmCompleteBtn.style.display = "none";
+        } else {
+          // Nếu có quyền, hiển thị nút hoàn tất
+          if (confirmCompleteBtn) confirmCompleteBtn.style.display = "block";
+        }
+
+        // Hiển thị modal
+        document.getElementById("confirmModal").classList.add("show");
+      }
+
+      /**
+       * Đóng modal xác nhận công đoạn và reset form
+       */
+      function closeConfirmModal() {
+        document.getElementById("confirmModal").classList.remove("show");
+        pendingTransportId = null;
+
+        // 🔹 Reset incident form (nếu có)
+        const incidentType = document.getElementById("incidentType");
+        const incidentNote = document.getElementById("incidentNote");
+        if (incidentType) incidentType.value = "";
+        if (incidentNote) incidentNote.value = "";
+
+        // 🔹 Reset next destination radios
+        document
+          .querySelectorAll('input[name="nextDestination"]')
+          .forEach((radio) => {
+            radio.checked = false;
+          });
+      }
+
+      /**
+       * Hiển thị modal chỉnh sửa thông tin điểm đầu/điểm đến
+       * - Load thông tin hiện tại của thùng đang xác nhận
+       * - Cho phép sửa điểm đầu và điểm đến
+       */
+      function showEditModal() {
+        // Chỉ hiển thị nút edit ở công đoạn 1
+        const transport = transports.find((t) => t.id === pendingTransportId);
+        if (!transport || transport.currentStage !== 1) {
+          alert("⚠️ Chỉ có thể chỉnh sửa thông tin ở công đoạn 1!");
+          return;
+        }
+
+        // Điền thông tin hiện tại vào form edit
+        document.getElementById("editSoThung").value = transport.soThung;
+
+        // Set radio button cho điểm đầu
+        document
+          .querySelectorAll('input[name="editDiemDau"]')
+          .forEach((radio) => {
+            radio.checked = radio.value === transport.diemDau;
+          });
+
+        // Set radio button cho điểm đến
+        document
+          .querySelectorAll('input[name="editDiemDen"]')
+          .forEach((radio) => {
+            radio.checked = radio.value === transport.diemDen;
+          });
+
+        // Hiển thị modal edit
+        document.getElementById("editModal").classList.add("show");
+      }
+
+      /**
+       * Đóng modal chỉnh sửa điểm đầu/điểm đến
+       */
+      function closeEditModal() {
+        document.getElementById("editModal").classList.remove("show");
+      }
+
+      /**
+       * Lưu thay đổi điểm đầu/điểm đến
+       * - Validate radio button được chọn
+       * - Cập nhật vào database qua API
+       * - Refresh danh sách vận hành
+       * @async
+       */
+      async function saveEdit() {
+        const transport = transports.find((t) => t.id === pendingTransportId);
+        if (!transport) return;
+
+        const newSoThung = document.getElementById("editSoThung").value.trim();
+
+        // Lấy giá trị từ radio button
+        const newDiemDau =
+          document.querySelector('input[name="editDiemDau"]:checked')?.value ||
+          "";
+        const newDiemDen =
+          document.querySelector('input[name="editDiemDen"]:checked')?.value ||
+          "";
+
+        if (!newSoThung || !newDiemDau || !newDiemDen) {
+          alert("⚠️ Vui lòng điền đầy đủ thông tin!");
+          return;
+        }
+
+        try {
+          // 🔹 Gọi API update thông tin thùng
+          const payload = {
+            SoThung: newSoThung,
+            DiemDau: newDiemDau,
+            DiemDen: newDiemDen,
+          };
+
+          const response = await fetch(
+            `https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/${transport.id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            },
+          );
+
+          if (!response.ok) {
+            const err = await response.json();
+            throw err;
+          }
+
+          // ✅ API update thành công → Cập nhật local state
+          transport.soThung = newSoThung;
+          transport.diemDau = newDiemDau;
+          transport.diemDen = newDiemDen;
+
+          // Cập nhật thông tin hiển thị trên modal xác nhận
+          document.getElementById("modalThungSo").textContent = newSoThung;
+          document.getElementById("modalDiemDau").textContent = newDiemDau;
+          document.getElementById("modalDiemDen").textContent = newDiemDen;
+
+          // Đóng modal edit và cập nhật display
+          closeEditModal();
+          updateDisplay();
+
+          alert("✅ Cập nhật thông tin thùng thành công!");
+        } catch (err) {
+          console.error("Update ladle info error:", err);
+          alert(err?.message || "❌ Không thể cập nhật thông tin thùng");
+        }
+      }
+
+      /**
+       * Xác nhận vào KR (công đoạn 3) cho HRC1/HRC2
+       * - Gọi API cập nhật GioVaoKR
+       * - Chuyển thùng sang công đoạn 3 (Vào KR)
+       * @async
+       */
+      async function confirmEnterKR() {
+        if (pendingTransportId === null) return;
+
+        const transport = transports.find((t) => t.id === pendingTransportId);
+        if (!transport) return;
+
+        const now = getCurrentTimeVN();
+
+        // Kiểm tra phải ở công đoạn 2 và điểm đến là HRC1/HRC2
+        if (transport.currentStage !== 2) {
+          alert("⚠️ Chỉ có thể xác nhận vào KR ở công đoạn 2!");
+          return;
+        }
+
+        const isHRC =
+          transport.diemDen === "HRC1" || transport.diemDen === "HRC2";
+        if (!isHRC) {
+          alert("⚠️ Chức năng này chỉ dành cho HRC1 và HRC2!");
+          return;
+        }
+
+        try {
+          // Tạo payload cập nhật GioVaoKR
+          const payload = {
+            GioVaoKR: getISOStringVN(now),
+            SoThung: transport.soThung,
+            DiemDau: transport.diemDau,
+            DiemDen: transport.diemDen,
+          };
+
+          // Gọi API update
+          await updateGangNhatTrinh(transport.id, payload);
+
+          // Cập nhật local state
+          transport.stageTimes.stage2 = now;
+          transport.currentStage = 3; // Chuyển sang công đoạn 3 (Vào KR)
+          transport.stageStartTime = now;
+          transport.stageStatus = "processing";
+
+          updateDisplay();
+          closeConfirmModal();
+
+          // Tiếp tục chạy timer công đoạn mới
+          processStage(transport.id);
+
+          alert("✅ Đã xác nhận vào KR thành công!");
+        } catch (err) {
+          console.error("Update KR entry time error:", err);
+          alert(err?.message || "❌ Không thể cập nhật giờ vào KR");
+        }
+      }
+
+      /**
+       * Xác nhận hoàn thành công đoạn hiện tại
+       * - Validate thời gian xác nhận
+       * - Gọi API cập nhật trạng thái công đoạn
+       * - Chuyển thùng sang công đoạn tiếp theo hoặc hoàn thành
+       * - Tự động chuyển sang chế độ "processing" cho công đoạn mới
+       * @async
+       */
+      async function confirmCompleteStage() {
+        if (pendingTransportId === null) return;
+
+        const transport = transports.find((t) => t.id === pendingTransportId);
+        if (!transport) return;
+
+        const now = getCurrentTimeVN();
+        const stage = transport.currentStage;
+
+        try {
+          // 🔹 RULE: Nếu điểm đến = "Đúc gang" → Hoàn tất ngay ở công đoạn 1
+          const isDucGangDestination =
+            transport.diemDen === "DUCGANG" || transport.diemDen === "Đúc gang";
+
+          // 🔹 Kiểm tra stage 6: yêu cầu chọn chu kỳ tiếp theo
+          if (stage === 6) {
+            const nextDestination = document.querySelector(
+              'input[name="nextDestination"]:checked',
+            )?.value;
+            if (!nextDestination) {
+              alert("⚠️ Vui lòng chọn điểm đến cho chu kỳ tiếp theo!");
+              return;
+            }
+          }
+
+          let payload;
+          if (stage === 1 && isDucGangDestination) {
+            // ✅ Đúc gang: Hoàn tất ngay
+            payload = {
+              GioDucGang: getISOStringVN(now),
+              TinhTrang: 1,
+            };
+          } else if (stage === 6) {
+            // 🔹 Công đoạn 6: ghi nhận hoàn tất và sẵn sàng cho chu kỳ mới
+            const nextDestination = document.querySelector(
+              'input[name="nextDestination"]:checked',
+            )?.value;
+
+            const isDucGang =
+              nextDestination === "DUCGANG" || nextDestination === "Đúc gang";
+            payload = buildUpdatePayloadByStage(stage, now, isDucGang);
+            // Thêm thông tin chu kỳ tiếp theo
+            payload.DiemDauTiepTheo = nextDestination;
+          } else if (stage === 2) {
+            // 🔹 Công đoạn 2: Khi xác nhận hoàn tất (không vào KR) → Skip stage 3, 4, đến stage 5
+            const isHRC =
+              transport.diemDen === "HRC1" || transport.diemDen === "HRC2";
+            if (!isHRC) {
+              payload = { GioRotXong: getISOStringVN(now) }; // Skip đến stage 5
+            } else {
+              payload = buildUpdatePayloadByStage(stage, now); // HRC: stage 2 → 3
+            }
+          } else {
+            // 🔹 Build payload đúng công đoạn (bình thường)
+            payload = buildUpdatePayloadByStage(stage, now);
+          }
+
+          // 🔹 Bổ sung thông tin số thùng, điểm đầu, điểm đến vào payload
+          payload.SoThung = transport.soThung;
+          payload.DiemDau = transport.diemDau;
+          payload.DiemDen = transport.diemDen;
+
+          // 🔹 Bổ sung ghi chú sự cố (nếu có)
+          const incidentType = document.getElementById("incidentType")?.value;
+          const incidentNote = document.getElementById("incidentNote")?.value;
+          if (incidentType) {
+            payload.SuCo = incidentType;
+          }
+          if (incidentNote) {
+            payload.GhiChuSuCo = incidentNote;
+          }
+
+          // 🔹 Gọi API update
+          await updateGangNhatTrinh(transport.id, payload);
+          // reload bảng ghi chép
+          loadGhiChepChatGang();
+
+          // 🔹 Reload dữ liệu từ server để đảm bảo hiển thị đúng
+          await loadDangVanHanhFromApi();
+
+          closeConfirmModal();
+        } catch (err) {
+          console.error("Update stage error:", err);
+          alert(err?.message || "❌ Không thể cập nhật công đoạn");
+        }
+      }
+
+      /**
+       * Xử lý khi thùng gang hoàn thành toàn bộ quy trình
+       * - Chuyển thùng sang danh sách hoàn thành
+       * - Loại khỏi danh sách vận hành
+       * - Cập nhật giao diện
+       * @param {Object} transport - Thông tin thùng gang hoàn thành
+       */
+      function completeTransport(transport) {
+        const endTime = new Date();
+        const duration = Math.floor((endTime - transport.startTime) / 1000);
+
+        // Format thời gian cho từng công đoạn
+        const formatTime = (date) => {
+          if (!date) return "-";
+          return date.toLocaleTimeString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+        };
+
+        const historyItem = {
+          soThung: transport.soThung,
+          diemDau: transport.diemDau,
+          diemDen: transport.diemDen,
+          ngayTao: transport.startTime.toLocaleDateString("vi-VN"),
+          ngayTaoDate: new Date(transport.startTime.toDateString()), // Để lọc
+          gioBatDau: formatTime(transport.stageTimes.stage1),
+          gioVaoGianCho: formatTime(transport.stageTimes.stage2),
+          gioRotXong: formatTime(transport.stageTimes.stage3),
+          gioRaLuyen: formatTime(transport.stageTimes.stage4),
+          duration: `${duration}s`,
+          status: "completed",
+        };
+
+        history.unshift(historyItem);
+
+        // Xóa transport khỏi danh sách
+        transports = transports.filter((t) => t.id !== transport.id);
+
+        updateDisplay();
+        // Áp dụng bộ lọc hiện tại
+        applyCurrentFilter();
+      }
+
+      /**
+       * Lọc lịch sử theo số thùng và khoảng thời gian
+       * - Validate khoảng thời gian hợp lệ
+       * - Gọi API lấy dữ liệu lịch sử
+       * - Cập nhật bảng lịch sử
+       * @async
+       */
+      function filterHistory() {
+        loadGhiChepChatGang();
+        // const fromDateStr = document.getElementById("filterFromDate").value;
+        // const toDateStr = document.getElementById("filterToDate").value;
+        // const thungSo = document
+        //   .getElementById("filterThungSo")
+        //   .value.trim()
+        //   .toLowerCase();
+
+        // let filtered = [...history];
+
+        // // Lọc theo ngày
+        // if (fromDateStr && toDateStr) {
+        //   const fromDate = new Date(fromDateStr);
+        //   const toDate = new Date(toDateStr);
+        //   toDate.setHours(23, 59, 59, 999); // Đến cuối ngày
+
+        //   if (fromDate > toDate) {
+        //     alert("⚠️ Ngày bắt đầu phải trước hoặc bằng ngày kết thúc!");
+        //     return;
+        //   }
+
+        //   filtered = filtered.filter((item) => {
+        //     return item.ngayTaoDate >= fromDate && item.ngayTaoDate <= toDate;
+        //   });
+        // }
+
+        // // Lọc theo số thùng
+        // if (thungSo) {
+        //   filtered = filtered.filter((item) => {
+        //     return item.soThung.toLowerCase().includes(thungSo);
+        //   });
+        // }
+
+        // filteredHistory = filtered;
+        // updateHistoryTable();
+      }
+
+      /**
+       * Reset bộ lọc lịch sử về giá trị mặc định (ngày hôm nay)
+       * - Xóa số thùng
+       * - Đặt lại ngày bắt đầu và kết thúc về hôm nay
+       * - Gọi lại hàm lọc
+       */
+      function resetFilter() {
+        const today = getCurrentTimeVN();
+        const year = today.getUTCFullYear();
+        const month = String(today.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(today.getUTCDate()).padStart(2, "0");
+        const todayStr = `${year}-${month}-${day}`;
+        document.getElementById("filterFromDate").value = todayStr;
+        document.getElementById("filterToDate").value = todayStr;
+        document.getElementById("filterThungSo").value = "";
+
+        loadGhiChepChatGang();
+      }
+
+      /**
+       * Áp dụng bộ lọc hiện tại vào danh sách lịch sử hoàn thành
+       * - Lọc theo số thùng (nếu có)
+       * - Lọc theo khoảng thời gian
+       * - Cập nhật bảng hiển thị
+       */
+      function applyCurrentFilter() {
+        const fromDateStr = document.getElementById("filterFromDate").value;
+        const toDateStr = document.getElementById("filterToDate").value;
+        const thungSo = document.getElementById("filterThungSo").value.trim();
+
+        if (fromDateStr || toDateStr || thungSo) {
+          filterHistory();
+        } else {
+          updateHistoryTable();
+        }
+      }
+
+      /**
+       * Cập nhật giao diện sơ đồ vận hành
+       * - Render danh sách thùng gang theo từng công đoạn
+       * - Hiển thị thông tin chi tiết (số thùng, điểm đầu/đến, thời gian)
+       * - Cập nhật trạng thái (processing/waiting-confirm)
+       * - Hiển thị nút xóa/xác nhận tùy theo quyền
+       */
+      function updateDisplay() {
+        // Cập nhật từng công đoạn (chỉ stage 1-6, stage 7 gộp vào stage 6)
+        STAGES.filter((s) => s.id <= 6).forEach((stage) => {
+          const stageTransports = transports.filter(
+            (t) => t.currentStage === stage.id,
+          );
+          const stageDiv = document.getElementById(`stage${stage.id}`);
+          const ladlesDiv = document.getElementById(`stage${stage.id}-ladles`);
+
+          if (!stageDiv || !ladlesDiv) return; // Skip nếu không tìm thấy element
+
+          const countDiv = stageDiv.querySelector(".stage-count");
+
+          // Cập nhật số lượng
+          countDiv.textContent = stageTransports.length;
+
+          // Thêm/xóa class has-active
+          if (stageTransports.length > 0) {
+            stageDiv.classList.add("has-active");
+          } else {
+            stageDiv.classList.remove("has-active");
+          }
+
+          // Cập nhật danh sách thùng
+          if (stageTransports.length === 0) {
+            ladlesDiv.innerHTML =
+              '<div class="empty-stage">Không có thùng gang</div>';
+          } else {
+            ladlesDiv.innerHTML = stageTransports
+              .map((t) => {
+                const elapsed = Math.floor(
+                  (getCurrentTimeVN() - t.stageStartTime) / 1000,
+                );
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                const timeStr =
+                  minutes > 0
+                    ? `${minutes.toString().padStart(2, "0")}:${seconds
+                        .toString()
+                        .padStart(2, "0")}`
+                    : `00:${seconds.toString().padStart(2, "0")}`;
+
+                const statusClass =
+                  t.stageStatus === "completed"
+                    ? "completed"
+                    : t.stageStatus === "waiting-confirm"
+                      ? "waiting-confirm"
+                      : "processing";
+                const statusText =
+                  t.stageStatus === "completed"
+                    ? "Chờ chu kỳ mới"
+                    : t.stageStatus === "waiting-confirm"
+                      ? "Chờ xác nhận"
+                      : "Đang xử lý";
+
+                const statusBadgeClass =
+                  t.stageStatus === "completed"
+                    ? "completed"
+                    : t.stageStatus === "waiting-confirm"
+                      ? "waiting"
+                      : "processing";
+                const clickHandler =
+                  t.stageStatus === "waiting-confirm" || t.currentStage === 6
+                    ? `onclick="showConfirmModal(${t.id})"`
+                    : "";
+                const cursorStyle =
+                  t.stageStatus === "waiting-confirm" || t.currentStage === 6
+                    ? "cursor: pointer;"
+                    : "";
+
+                // Nút xóa hiển thị ở công đoạn 1 bất kể trạng thái (đang xử lý hoặc chờ xác nhận)
+                const deleteButton =
+                  t.currentStage === 1
+                    ? `<button class="delete-btn" onclick="showDeleteModal(${t.id}, event)" title="Xóa thùng">✕</button>`
+                    : "";
+
+                // Nút quay lại công đoạn trước (hiển thị khi currentStage > 1)
+                const rollbackButton =
+                  t.currentStage > 1 && window.__CAN_CONFIRM_STAGE__
+                    ? `<button class="delete-btn" onclick="showRollbackModal(${t.id}, event)" title="Quay lại công đoạn trước" style="background: linear-gradient(135deg, #ff9800, #fb8c00); right: 45px;">↶</button>`
+                    : "";
+
+                return `
+                              <div class="ladle-item ${statusClass}" data-transport-id="${
+                                t.id
+                              }" ${clickHandler} style="${cursorStyle}">
+                                  ${deleteButton}
+                                  ${rollbackButton}
+                                  <div class="ladle-icon">${t.soThung.replace(
+                                    /\D/g,
+                                    "",
+                                  )}</div>
+                                  <div class="ladle-details">
+                                      <div class="ladle-id">Thùng ${
+                                        t.soThung
+                                      }</div>
+                                      <div style="font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                        <span><strong>${
+                                          t.diemDau
+                                        }</strong></span>
+                                        <span style="font-size: 1rem; color: var(--accent-cyan);">→</span>
+                                        <span><strong>${
+                                          t.diemDen
+                                        }</strong></span>
+                                      </div>
+                                      <div class="ladle-time">${timeStr}</div>
+                                      <span class="ladle-status ${statusBadgeClass}">${statusText}</span>
+                                  </div>
+                              </div>
+                          `;
+              })
+              .join("");
+          }
+        });
+      }
+
+      /**
+       * Cập nhật bảng lịch sử thùng gang đã hoàn thành
+       * - Hiển thị danh sách thùng đã hoàn thành tất cả công đoạn
+       * - Sắp xếp theo thời gian mới nhất
+       */
+      function updateHistoryTable() {
+        const tbody = document.getElementById("historyBody");
+
+        // Sử dụng filteredHistory nếu có bộ lọc, nếu không dùng history đầy đủ
+        const hasFilter =
+          document.getElementById("filterFromDate").value ||
+          document.getElementById("filterToDate").value ||
+          document.getElementById("filterThungSo").value.trim();
+
+        const displayHistory = hasFilter ? filteredHistory : history;
+
+        if (displayHistory.length === 0) {
+          const message =
+            hasFilter && history.length > 0
+              ? "Không có dữ liệu phù hợp với điều kiện lọc"
+              : "Chưa có dữ liệu vận chuyển";
+          tbody.innerHTML = `<tr><td colspan="10" class="no-data">${message}</td></tr>`;
+          return;
+        }
+
+        tbody.innerHTML = displayHistory
+          .map(
+            (item, index) => `
+                  <tr>
+                      <td><strong>${displayHistory.length - index}</strong></td>
+                      <td>${item.ngayTao}</td>
+                      <td><strong>${item.soThung}</strong></td>
+                      <td>${item.diemDau}</td>
+                      <td>${item.diemDen}</td>
+                      <td>${item.gioBatDau}</td>
+                      <td>${item.gioVaoGianCho}</td>
+                      <td>${item.gioRotXong}</td>
+                      <td>${item.gioRaLuyen}</td>
+                      <td><span class="badge completed">✓ Hoàn Thành</span></td>
+                  </tr>
+              `,
+          )
+          .join("");
+      }
+
+      // Đóng modal khi click bên ngoài
+      document
+        .getElementById("confirmModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeConfirmModal();
+          }
+        });
+
+      document
+        .getElementById("editModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeEditModal();
+          }
+        });
+
+      document
+        .getElementById("deleteModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeDeleteModal();
+          }
+        });
+
+      // Cập nhật display mỗi giây để hiển thị thời gian real-time
+      setInterval(() => {
+        if (transports.length > 0) {
+          updateDisplay();
+        }
+      }, 1000);
+
+      /**
+       * Load dữ liệu thùng gang đang vận hành từ API
+       * @param {string|null} idLoCao - ID lò cao cần lọc (nếu có)
+       */
+      async function loadDangVanHanhFromApi(idLoCao = null) {
+        try {
+          // Không load khi đang mở modal
+          if (
+            document
+              .getElementById("confirmModal")
+              ?.classList.contains("show") ||
+            document
+              .getElementById("deleteModal")
+              ?.classList.contains("show") ||
+            document.getElementById("loginModal")?.classList.contains("show")
+          )
+            return;
+
+          if (isRefreshing) return;
+          isRefreshing = true;
+
+          // Lấy filter lò cao từ tham số hoặc localStorage
+          const loCaoFilter = idLoCao || getLoCaoId();
+          const hrcFilter = getHrcId(); // 🔹 Lấy filter HRC từ localStorage
+
+          // 🔹 Gọi API latest để lấy dữ liệu ngày ca sản xuất mới nhất
+          const apiUrl =
+            "https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/latest";
+
+          const resRunning = await fetch(apiUrl);
+          if (!resRunning.ok) throw new Error("API error");
+          let runningData = await resRunning.json();
+
+          // 🔹 Filter theo lò cao nếu có
+          if (loCaoFilter) {
+            runningData = runningData.filter(
+              (item) => item.DiemDau === `Lò Cao ${loCaoFilter}`,
+            );
+          }
+
+          // 🔹 Filter theo HRC nếu có
+          if (hrcFilter) {
+            const hrcName = `HRC${hrcFilter}`;
+            runningData = runningData.filter(
+              (item) => item.DiemDen === hrcName,
+            );
+          }
+
+          // Chuyển đổi dữ liệu sang cấu trúc hiển thị
+          transports = runningData
+            .map((item) => {
+              const stageInfo = detectCurrentStage(item);
+              if (!stageInfo) return null;
+
+              return {
+                id: item.ID,
+                soThung: item.SoThung,
+                diemDau: item.DiemDau ?? "",
+                diemDen: item.DiemDen ?? "",
+                currentStage: stageInfo.stage,
+                stageStartTime: stageInfo.startTime,
+                stageStatus: "waiting-confirm",
+                stageTimes: {
+                  stage1: parseDateSafe(item.GioBatDau),
+                  stage2: parseDateSafe(item.GioVaoLT),
+                  stage3: parseDateSafe(item.GioVaoKR),
+                  stage4: parseDateSafe(item.GioRaKR),
+                  stage5: parseDateSafe(item.GioRotXong),
+                  stage6: parseDateSafe(item.GioRaLT),
+                  stage7: parseDateSafe(item.GioDucGang),
+                },
+                tphh: {
+                  me: item.Me ?? "-",
+                  khoiLuong: item.KhoiLuong ?? null,
+                  nhietDoThung: item.NhietDoThung ?? "-",
+                  c: item.C ?? "-",
+                  si: item.Si ?? "-",
+                  mn: item.Mn ?? "-",
+                  p: item.P ?? "-",
+                  s: item.S ?? "-",
+                },
+              };
+            })
+            .filter((t) => t !== null);
+
+          updateDisplay();
+        } catch (err) {
+          console.error("❌ Lỗi load dữ liệu vận hành:", err);
+          alert("⚠️ Không tải được dữ liệu vận hành");
+        } finally {
+          isRefreshing = false;
+        }
+      }
+
+      /**
+       * Parse chuỗi thời gian sang Date object an toàn
+       * @param {string|Date|null} v - Giá trị cần parse
+       * @returns {Date|null} Date object hoặc null nếu không hợp lệ
+       */
+      function parseDateSafe(v) {
+        if (!v) return null;
+        const d = new Date(v);
+        return isNaN(d.getTime()) ? null : d;
+      }
+
+      /**
+       * Xác định công đoạn hiện tại (Logic 5 công đoạn)
+       * @param {Object} item - Dữ liệu thùng gang
+       * @returns {Object|null} Thông tin stage hiện tại
+       */
+      function detectCurrentStage(item) {
+        const gioBatDau = parseDateSafe(item.GioBatDau);
+        const gioVaoLT = parseDateSafe(item.GioVaoLT);
+        const gioVaoKR = parseDateSafe(item.GioVaoKR);
+        const gioRaKR = parseDateSafe(item.GioRaKR);
+        const gioRotXong = parseDateSafe(item.GioRotXong);
+        const gioRaLT = parseDateSafe(item.GioRaLT);
+        const gioDucGang = parseDateSafe(item.GioDucGang);
+
+        const isHRC = item.DiemDen === "HRC1" || item.DiemDen === "HRC2";
+        const isDucGang =
+          item.DiemDen === "DUCGANG" || item.DiemDen === "Đúc gang";
+
+        // 🔴 ƯU TIÊN MỐC CAO NHẤT
+        // Stage 6 & 7 đều hiển thị ở vùng stage6
+        if (gioDucGang) {
+          return { stage: 6, startTime: gioDucGang, displayStage: 7 };
+        }
+
+        if (gioRaLT) {
+          return { stage: 6, startTime: gioRaLT, displayStage: 6 };
+        }
+
+        if (gioRotXong) {
+          return { stage: 5, startTime: gioRotXong };
+        }
+
+        // 🔹 Chỉ HRC mới có stage 4 (Ra KR)
+        if (gioRaKR && isHRC) {
+          return { stage: 4, startTime: gioRaKR };
+        }
+
+        // 🔹 Chỉ HRC mới có stage 3 (Vào KR)
+        if (gioVaoKR && isHRC) {
+          return { stage: 3, startTime: gioVaoKR };
+        }
+
+        if (gioVaoLT) {
+          return { stage: 2, startTime: gioVaoLT };
+        }
+
+        if (gioBatDau) {
+          return { stage: 1, startTime: gioBatDau };
+        }
+
+        // HOÀN TẤT → KHÔNG HIỂN THỊ
+        return null;
+      }
+
+      async function postPhanBoVanChuyen({ soThung, diemDau, diemDen }) {
+        const vnNow = getCurrentTimeVN();
+        const payload = {
+          SoThung: soThung,
+          NgayTao: getISOStringVN(vnNow), // YYYY-MM-DD
+          GioBatDau: getISOStringVN(vnNow),
+          DiemDau: diemDau,
+          DiemDen: diemDen,
+        };
+
+        const res = await fetch(
+          "https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          },
+        );
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw err;
+        }
+
+        return await res.json(); // trả về bản ghi vừa tạo (có ID, ThuTu)
+      }
+
+      function buildUpdatePayloadByStage(stage, time, isDucGang = false) {
+        const isoTime = getISOStringVN(time);
+
+        switch (stage) {
+          case 1:
+            return { GioVaoLT: isoTime }; // Stage 1 -> 2: Vào gian chờ thép
+
+          case 2:
+            return { GioVaoKR: isoTime }; // Stage 2 -> 3: Vào KR (chỉ HRC)
+
+          case 3:
+            return { GioRaKR: isoTime }; // Stage 3 -> 4: Ra KR (chỉ HRC)
+
+          case 4:
+            return { GioRotXong: isoTime }; // Stage 4 -> 5: Rót xong
+
+          case 5:
+            return { GioRaLT: isoTime }; // Stage 5 -> 6: Ra luyện thép
+
+          case 6:
+            // Stage 6: Hoàn tất - chọn chu kỳ tiếp theo hoặc đúc gang
+            if (isDucGang) {
+              return { GioDucGang: isoTime, TinhTrang: 1 }; // Đúc gang
+            }
+            return { TinhTrang: 1 }; // Hoàn tất bình thường
+
+          default:
+            return {};
+        }
+      }
+
+      async function updateGangNhatTrinh(id, payload) {
+        const res = await fetch(
+          `https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/${id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          },
+        );
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw err;
+        }
+
+        return await res.json();
+      }
+
+      // load giá trị mặc định cho bộ lọc ngày
+      async function loadGhiChepChatGang() {
+        try {
+          const fromDate = document.getElementById("filterFromDate").value;
+          const toDate = document.getElementById("filterToDate").value;
+          const soThung = document.getElementById("filterThungSo").value.trim();
+          const loCaoId = getLoCaoId(); // 🔹 Lấy filter lò cao từ mã đăng nhập
+          const hrcId = getHrcId(); // 🔹 Lấy filter HRC từ mã đăng nhập
+
+          const params = new URLSearchParams();
+
+          if (fromDate) params.append("fromDate", fromDate);
+          if (toDate) params.append("toDate", toDate);
+          if (soThung) params.append("soThung", soThung);
+          if (loCaoId) params.append("idLoCao", loCaoId); // 🔹 Thêm filter lò cao
+
+          const res = await fetch(
+            `https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/search?${params}`,
+          );
+
+          if (!res.ok) throw new Error("API error");
+
+          let data = await res.json();
+
+          // 🔹 Filter theo HRC nếu có
+          if (hrcId) {
+            const hrcName = `HRC${hrcId}`;
+            data = data.filter((item) => item.DiemDen === hrcName);
+          }
+
+          renderHistoryTable(data);
+        } catch (err) {
+          console.error(err);
+          alert("⚠️ Không tải được ghi chép gang");
+        }
+      }
+
+      function renderHistoryTable(data) {
+        const tbody = document.getElementById("historyBody");
+
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="21" class="no-data">Chưa có dữ liệu</td></tr>`;
+          document.getElementById("currentPage").textContent = "0";
+          document.getElementById("totalPages").textContent = "0";
+          document.getElementById("prevBtn").disabled = true;
+          document.getElementById("nextBtn").disabled = true;
+          return;
+        }
+
+        // Calculate pagination
+        totalItems = data.length;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const startIndex = (currentPageNum - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const paginatedData = data.slice(startIndex, endIndex);
+
+        // Update pagination info
+        document.getElementById("currentPage").textContent = currentPageNum;
+        document.getElementById("totalPages").textContent = totalPages;
+        document.getElementById("prevBtn").disabled = currentPageNum === 1;
+        document.getElementById("nextBtn").disabled =
+          currentPageNum === totalPages;
+
+        tbody.innerHTML = paginatedData
+          .map(
+            (item, index) => `
+        <tr>
+          <td><strong>${startIndex + index + 1}</strong></td>
+          <td>${formatDate(item.NgaySX)}</td>
+          <td>${item.CaSX ?? "-"}</td>
+          <td><strong>${item.SoThung}</strong></td>
+          <td>${item.ThuTu ?? "-"}</td>
+          <td>${item.Me ?? "-"}</td>
+          <td>${item.DiemDau ?? "-"}</td>
+          <td>${item.DiemDen ?? "-"}</td>
+          <td>${item.KhoiLuong ? item.KhoiLuong.toFixed(2) : "-"}</td>
+          <td>${item.NhietDoThung ?? "-"}</td>
+          <td>${formatTime(item.G_BatDauRot)}</td>
+          <td>${formatTime(item.G_RotDayThung)}</td>
+          <td>${formatTime(item.GioBatDau)}</td>
+          <td>${formatTime(item.GioVaoLT)}</td>
+          <td>${formatTime(item.GioVaoKR)}</td>
+          <td>${formatTime(item.GioRaKR)}</td>
+          <td>${formatTime(item.GioRotXong)}</td>
+          <td>${formatTime(item.GioRaLT)}</td>
+          <td>${formatTime(item.GioDucGang)}</td>
+          <td>
+            ${
+              item.TinhTrang === 1
+                ? `<span class="badge completed">✓ Hoàn Thành</span>`
+                : `<span class="badge in-progress">⏳ Đang chạy</span>`
+            }
+          </td>
+          <td>
+            <button 
+              class="modal-btn modal-btn-confirm" 
+              onclick='showHistoryDetailModal(${JSON.stringify(item).replace(/'/g, "&apos;")})'
+              style="padding: 6px 12px; font-size: 0.85rem; min-width: auto;">
+              🔍 Xem
+            </button>
+          </td>
+        </tr>
+      `,
+          )
+          .join("");
+      }
+
+      function previousPage() {
+        if (currentPageNum > 1) {
+          currentPageNum--;
+          loadGhiChepChatGang();
+        }
+      }
+
+      function nextPage() {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        if (currentPageNum < totalPages) {
+          currentPageNum++;
+          loadGhiChepChatGang();
+        }
+      }
+
+      function formatTime(value) {
+        if (!value) return "-";
+
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return "-";
+
+        return d.toLocaleTimeString("vi-VN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+      }
+
+      function formatDate(value) {
+        if (!value) return "-";
+
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return "-";
+
+        return d.toLocaleDateString("vi-VN");
+      }
+
+      /**
+       * Hiển thị modal thông tin chi tiết từ bảng Ghi Chép Gang
+       * @param {Object} item - Dữ liệu thùng gang từ API
+       */
+      function showHistoryDetailModal(item) {
+        // Cập nhật thông tin thùng
+        document.getElementById("modalThungSo").textContent = item.SoThung;
+        document.getElementById("modalDiemDau").textContent =
+          item.DiemDau ?? "-";
+        document.getElementById("modalDiemDen").textContent =
+          item.DiemDen ?? "-";
+
+        // 🔹 Hiển thị mốc thời gian cho từng công đoạn
+        const isHRC = item.DiemDen === "HRC1" || item.DiemDen === "HRC2";
+
+        // Hiển thị/ẩn công đoạn KR cho HRC
+        const stage3 = document.querySelector('.timeline-step[data-stage="3"]');
+        const stage4 = document.querySelector('.timeline-step[data-stage="4"]');
+        const arrow3 = document.getElementById("arrow3");
+        const arrow4 = document.getElementById("arrow4");
+
+        if (isHRC) {
+          if (stage3) stage3.style.display = "";
+          if (stage4) stage4.style.display = "";
+          if (arrow3) arrow3.style.display = "";
+          if (arrow4) arrow4.style.display = "";
+        } else {
+          if (stage3) stage3.style.display = "none";
+          if (stage4) stage4.style.display = "none";
+          if (arrow3) arrow3.style.display = "none";
+          if (arrow4) arrow4.style.display = "none";
+        }
+
+        // Cập nhật mốc thời gian cho từng công đoạn
+        document.getElementById("timeStage1").textContent = formatTime(
+          item.GioBatDau,
+        );
+        document.getElementById("timeStage2").textContent = formatTime(
+          item.GioVaoLT,
+        );
+        document.getElementById("timeStage3").textContent = formatTime(
+          item.GioVaoKR,
+        );
+        document.getElementById("timeStage4").textContent = formatTime(
+          item.GioRaKR,
+        );
+        document.getElementById("timeStage5").textContent = formatTime(
+          item.GioRotXong,
+        );
+        document.getElementById("timeStage6").textContent = formatTime(
+          item.GioRaLT,
+        );
+
+        // 🔹 Cập nhật thông tin TPHH
+        document.getElementById("tphhMe").textContent = item.Me || "-";
+        document.getElementById("tphhKhoiLuong").textContent = item.KhoiLuong
+          ? item.KhoiLuong.toFixed(2) + " tấn"
+          : "-";
+        document.getElementById("tphhNhietDo").textContent = item.NhietDoThung
+          ? item.NhietDoThung + "°C"
+          : "-";
+        document.getElementById("tphhC").textContent = item.C || "-";
+        document.getElementById("tphhSi").textContent = item.Si || "-";
+        document.getElementById("tphhMn").textContent = item.Mn || "-";
+        document.getElementById("tphhP").textContent = item.P || "-";
+        document.getElementById("tphhS").textContent = item.S || "-";
+
+        // 🔹 Highlight công đoạn cuối cùng (hoàn tất)
+        document.querySelectorAll(".timeline-step").forEach((step) => {
+          step.classList.remove("active");
+        });
+
+        // Tìm công đoạn cuối cùng dựa vào mốc thời gian
+        let lastStage = 1;
+        if (item.GioDucGang)
+          lastStage = 6; // Đúc gang cũng hiển thị ở stage 6
+        else if (item.GioRaLT) lastStage = 6;
+        else if (item.GioRotXong) lastStage = 5;
+        else if (item.GioRaKR && isHRC) lastStage = 4;
+        else if (item.GioVaoKR && isHRC) lastStage = 3;
+        else if (item.GioVaoLT) lastStage = 2;
+
+        const currentTimelineStep = document.querySelector(
+          `.timeline-step[data-stage="${lastStage}"]`,
+        );
+        if (currentTimelineStep) {
+          currentTimelineStep.classList.add("active");
+        }
+
+        // Ẩn tất cả các nút chức năng (chỉ xem thông tin)
+        const editBtn = document.getElementById("editBtn");
+        const confirmKRBtn = document.getElementById("confirmKRBtn");
+        const confirmCompleteBtn = document.querySelector(
+          "#confirmModal .modal-actions .modal-btn-confirm:not(#confirmKRBtn)",
+        );
+
+        if (editBtn) editBtn.style.display = "none";
+        if (confirmKRBtn) confirmKRBtn.style.display = "none";
+        if (confirmCompleteBtn) confirmCompleteBtn.style.display = "none";
+
+        // Ẩn phần chọn chu kỳ tiếp theo
+        const modalBody = document.querySelector(".modal-body");
+        if (modalBody) modalBody.style.display = "flex";
+
+        // Hiển thị modal
+        document.getElementById("confirmModal").classList.add("show");
+      }
+      // Login
+
+      const ROLE_KEY = "GANG_ROLE"; // localStorage key
+      const LOCAO_KEY = "GANG_LOCAO_ID"; // localStorage key cho lò cao
+      const HRC_KEY = "GANG_HRC_ID"; // localStorage key cho HRC1/HRC2
+
+      const ROLES = {
+        TRUONGKIP: "TRUONGKIP",
+        DIEUDO: "DIEUDO",
+        VIEW: "VIEW",
+      };
+
+      function getCurrentRole() {
+        return localStorage.getItem(ROLE_KEY);
+      }
+
+      function setRole(role) {
+        localStorage.setItem(ROLE_KEY, role);
+      }
+
+      function getLoCaoId() {
+        return localStorage.getItem(LOCAO_KEY);
+      }
+
+      function setLoCaoId(id) {
+        if (id) {
+          localStorage.setItem(LOCAO_KEY, id);
+        } else {
+          localStorage.removeItem(LOCAO_KEY);
+        }
+      }
+
+      function getHrcId() {
+        return localStorage.getItem(HRC_KEY);
+      }
+
+      function setHrcId(id) {
+        if (id) {
+          localStorage.setItem(HRC_KEY, id);
+        } else {
+          localStorage.removeItem(HRC_KEY);
+        }
+      }
+
+      function submitLoginCode() {
+        const code = document
+          .getElementById("loginCode")
+          .value.trim()
+          .toUpperCase();
+
+        // 🔹 Kiểm tra mã LOCAO1-LOCAO6
+        const locaoMatch = code.match(/^LOCAO([1-6])$/);
+        // 🔹 Kiểm tra mã HRC1-HRC2
+        const hrcMatch = code.match(/^HRC([1-2])$/);
+
+        if (locaoMatch) {
+          const loCaoId = locaoMatch[1];
+          setRole(ROLES.DIEUDO); // Mã lò cao chỉ có quyền điều độ
+          setLoCaoId(loCaoId);
+          setHrcId(null); // Xóa filter HRC nếu có
+        } else if (hrcMatch) {
+          const hrcId = hrcMatch[1]; // "1" hoặc "2"
+          setRole(ROLES.DIEUDO); // Mã HRC chỉ có quyền điều độ
+          setHrcId(hrcId);
+          setLoCaoId(null); // Xóa filter lò cao nếu có
+        } else if (code === ROLES.TRUONGKIP || code === ROLES.DIEUDO) {
+          setRole(code);
+          setLoCaoId(null); // Xóa filter lò cao nếu có
+          setHrcId(null); // Xóa filter HRC nếu có
+        } else {
+          setRole(ROLES.VIEW);
+          setLoCaoId(null); // Xóa filter lò cao nếu có
+          setHrcId(null); // Xóa filter HRC nếu có
+        }
+
+        document.getElementById("loginModal").classList.remove("show");
+        applyRolePermission();
+
+        // 🔹 Reload lại dữ liệu với filter mới
+        loadDangVanHanhFromApi();
+        loadGhiChepChatGang();
+      }
+      // Apply role permissions
+      function applyRolePermission() {
+        const role = getCurrentRole();
+        const hrcId = getHrcId();
+
+        // Hiện / ẩn nút logout
+        // const logoutBtn = document.getElementById("logoutBtn");
+        // if (logoutBtn) {
+        //   logoutBtn.style.display = role === ROLES.VIEW ? "none" : "block";
+        // }
+
+        // 🔹 Phân bổ vận chuyển (CHỈ TRƯỞNG KÍP)
+        const phanBoSection = document.querySelector(".section"); // section đầu
+        const btnBatDau = document.querySelector(
+          'button[onclick="batDauVanChuyen()"]',
+        );
+
+        if (role === ROLES.TRUONGKIP) {
+          phanBoSection.style.display = "";
+          if (btnBatDau) btnBatDau.disabled = false;
+        } else {
+          phanBoSection.style.display = "none";
+        }
+
+        // 🔹 Ẩn/hiện công đoạn theo role
+        const stage1Section = document.getElementById("stage1");
+        const stage3Section = document.getElementById("stage3"); // Vào KR
+        const stage4Section = document.getElementById("stage4"); // Ra KR
+        const stage6Section = document.getElementById("stage6"); // Hoàn tất
+        const stagesWrapper = document.querySelector(".stages-wrapper");
+
+        // 🔹 VIEW và TRUONGKIP: Hiển thị tất cả công đoạn (gang + HRC)
+        if (role === ROLES.VIEW || role === ROLES.TRUONGKIP) {
+          if (stage1Section) stage1Section.style.display = "";
+          if (stage3Section) stage3Section.style.display = "";
+          if (stage4Section) stage4Section.style.display = "";
+          if (stage6Section) stage6Section.style.display = "";
+          if (stagesWrapper) stagesWrapper.classList.remove("hrc-horizontal");
+        } else if (hrcId) {
+          // HRC (DIEUDO): Chỉ hiển thị stage 2, 3, 4, 5 (Vào gian chờ -> Vào KR -> Ra KR -> Rót xong)
+          if (stage1Section) stage1Section.style.display = "none";
+          if (stage3Section) stage3Section.style.display = "";
+          if (stage4Section) stage4Section.style.display = "";
+          if (stage6Section) stage6Section.style.display = "none";
+          if (stagesWrapper) stagesWrapper.classList.add("hrc-horizontal");
+        } else {
+          // DIEUDO không có HRC: Hiện stage 1, ẩn stage 3, 4 (KR)
+          if (stage1Section) stage1Section.style.display = "";
+          if (stage3Section) stage3Section.style.display = "none";
+          if (stage4Section) stage4Section.style.display = "none";
+          if (stage6Section) stage6Section.style.display = "";
+          if (stagesWrapper) stagesWrapper.classList.remove("hrc-horizontal");
+        }
+
+        // 🔥 XÁC NHẬN CÔNG ĐOẠN: TRƯỞNG KÍP + ĐIỀU ĐỘ
+        window.__CAN_CONFIRM_STAGE__ =
+          role === ROLES.TRUONGKIP || role === ROLES.DIEUDO;
+      }
+
+      // Chặn xác nhận công đoạn nếu không có quyền
+
+      // log out
+      function logout() {
+        if (!confirm("Bạn có chắc chắn muốn đăng xuất?")) return;
+
+        // Xóa mã đăng nhập
+        localStorage.removeItem("GANG_ROLE");
+        localStorage.removeItem("GANG_LOCAO_ID");
+        localStorage.removeItem("GANG_HRC_ID");
+
+        if (autoRefreshTimer) {
+          clearInterval(autoRefreshTimer);
+          autoRefreshTimer = null;
+        }
+
+        // Reload để hiện lại màn hình đăng nhập
+        location.reload();
+      }
+
+      async function loadCompletedNotNextFromApi() {
+        const res = await fetch(
+          "https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/completed-not-next",
+        );
+        if (!res.ok) throw new Error("API completed-not-next error");
+        return await res.json();
+      }
+
+      window.onload = function () {
+        const today = getCurrentTimeVN();
+        const year = today.getUTCFullYear();
+        const month = String(today.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(today.getUTCDate()).padStart(2, "0");
+        const todayStr = `${year}-${month}-${day}`;
+        document.getElementById("filterFromDate").value = todayStr;
+        document.getElementById("filterToDate").value = todayStr;
+
+        // 🔥 Load dữ liệu vận hành dang dở
+        loadDangVanHanhFromApi();
+        loadGhiChepChatGang();
+
+        const role = getCurrentRole();
+        const loCaoId = getLoCaoId();
+        const hrcId = getHrcId();
+        // ✅ ĐÃ CÓ MÃ HỢP LỆ → KHÔNG HIỆN MODAL
+        if (
+          role === ROLES.TRUONGKIP ||
+          role === ROLES.DIEUDO ||
+          (role === ROLES.VIEW && (loCaoId || hrcId || !loCaoId)) // VIEW hợp lệ với hoặc không có lò cao/HRC
+        ) {
+          applyRolePermission();
+        }
+        // ❌ CHƯA CÓ / KHÔNG HỢP LỆ → HIỆN MODAL
+        else {
+          document.getElementById("loginModal").classList.add("show");
+        }
+
+        // ❌ Nếu đang mở modal xác nhận/ login / xóa → không refresh
+        console.log(
+          "Setting up auto-refresh check...",
+          document.getElementById("loginModal")?.classList.contains("show"),
+        );
+        // 🔁 Auto refresh mỗi 5s
+        if (autoRefreshTimer) {
+          clearInterval(autoRefreshTimer);
+        }
+
+        autoRefreshTimer = setInterval(() => {
+          loadDangVanHanhFromApi();
+        }, 5000);
+      };
+    </script>
+  </body>
+</html>
