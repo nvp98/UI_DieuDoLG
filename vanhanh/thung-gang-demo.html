@@ -359,6 +359,14 @@
         background: linear-gradient(135deg, #00d9ff, #00a8cc);
       }
 
+      .stage-section[data-stage="5"] .ladle-icon {
+        background: linear-gradient(135deg, #ffc107, #ff9800);
+      }
+
+      .stage-section[data-stage="6"] .ladle-icon {
+        background: linear-gradient(135deg, #4caf50, #388e3c);
+      }
+
       .ladle-details {
         display: flex;
         flex-direction: column;
@@ -428,6 +436,109 @@
         border-radius: 50%;
         border: 2px solid var(--card-bg);
         animation: pulse 1s ease-in-out infinite;
+      }
+
+      /* Pending Containers Section */
+      .pending-section {
+        background: rgba(255, 193, 7, 0.05);
+        border: 2px dashed rgba(255, 193, 7, 0.3);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+      }
+
+      .pending-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+      }
+
+      .pending-icon {
+        font-size: 1.5rem;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 193, 7, 0.15);
+        border-radius: 50%;
+      }
+
+      .pending-title {
+        font-family: "Orbitron", sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--warning-yellow);
+      }
+
+      .pending-count {
+        background: rgba(255, 193, 7, 0.2);
+        color: var(--warning-yellow);
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 700;
+      }
+
+      .pending-containers {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+      }
+
+      .pending-item {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 193, 7, 0.2);
+        border-radius: 8px;
+        padding: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .pending-item:hover {
+        background: rgba(255, 193, 7, 0.08);
+        border-color: rgba(255, 193, 7, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+      }
+
+      .pending-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .pending-item-number {
+        font-family: "JetBrains Mono", monospace;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--warning-yellow);
+      }
+
+      .pending-item-icon {
+        font-size: 1.2rem;
+      }
+
+      .pending-item-info {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      .pending-item-info div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 3px;
+      }
+
+      .pending-empty {
+        text-align: center;
+        padding: 30px;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        font-style: italic;
       }
 
       .stages-wrapper {
@@ -1086,16 +1197,16 @@
 
       .modal-btn {
         flex: 1;
-        padding: 16px 20px;
+        padding: 10px 14px;
         border: none;
         border-radius: 10px;
         font-family: "Orbitron", sans-serif;
-        font-size: 1rem;
+        font-size: 0.8rem;
         font-weight: 700;
         cursor: pointer;
         transition: all 0.3s ease;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
+        letter-spacing: 1px;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
       }
 
@@ -1534,12 +1645,119 @@
               "
               >Số Thùng Gang</label
             >
-            <input
-              type="text"
+            <select
               id="soThung"
-              placeholder="VD: 01"
-              style="width: 100%"
-            />
+              style="
+                width: 100%;
+                padding: 10px;
+                border-radius: 6px;
+                border: 1px solid #444;
+                background: #2a2a2a;
+                color: #fff;
+                font-size: 0.95rem;
+              "
+            >
+              <option value="">-- Chọn số thùng --</option>
+              <option value="01">01</option>
+              <option value="02">02</option>
+              <option value="03">03</option>
+              <option value="04">04</option>
+              <option value="05">05</option>
+              <option value="06">06</option>
+              <option value="07">07</option>
+              <option value="08">08</option>
+              <option value="09">09</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
+              <option value="31">31</option>
+              <option value="32">32</option>
+              <option value="33">33</option>
+              <option value="34">34</option>
+              <option value="35">35</option>
+              <option value="36">36</option>
+              <option value="37">37</option>
+              <option value="38">38</option>
+              <option value="39">39</option>
+              <option value="40">40</option>
+              <option value="41">41</option>
+              <option value="42">42</option>
+              <option value="43">43</option>
+              <option value="44">44</option>
+              <option value="45">45</option>
+              <option value="46">46</option>
+              <option value="47">47</option>
+              <option value="48">48</option>
+              <option value="49">49</option>
+              <option value="50">50</option>
+              <option value="51">51</option>
+              <option value="52">52</option>
+              <option value="53">53</option>
+              <option value="54">54</option>
+              <option value="55">55</option>
+              <option value="56">56</option>
+              <option value="57">57</option>
+              <option value="58">58</option>
+              <option value="59">59</option>
+              <option value="60">60</option>
+              <option value="61">61</option>
+              <option value="62">62</option>
+              <option value="63">63</option>
+              <option value="64">64</option>
+              <option value="65">65</option>
+              <option value="66">66</option>
+              <option value="67">67</option>
+              <option value="68">68</option>
+              <option value="69">69</option>
+              <option value="70">70</option>
+              <option value="71">71</option>
+              <option value="72">72</option>
+              <option value="73">73</option>
+              <option value="74">74</option>
+              <option value="75">75</option>
+              <option value="76">76</option>
+              <option value="77">77</option>
+              <option value="78">78</option>
+              <option value="79">79</option>
+              <option value="80">80</option>
+              <option value="81">81</option>
+              <option value="82">82</option>
+              <option value="83">83</option>
+              <option value="84">84</option>
+              <option value="85">85</option>
+              <option value="86">86</option>
+              <option value="87">87</option>
+              <option value="88">88</option>
+              <option value="89">89</option>
+              <option value="90">90</option>
+              <option value="91">91</option>
+              <option value="92">92</option>
+              <option value="93">93</option>
+              <option value="94">94</option>
+              <option value="95">95</option>
+              <option value="96">96</option>
+              <option value="97">97</option>
+              <option value="98">98</option>
+              <option value="99">99</option>
+            </select>
           </div>
 
           <!-- Điểm Đầu -->
@@ -1630,12 +1848,24 @@
       <div class="section">
         <h2 class="section-title">Sơ Đồ Vận Hành</h2>
 
+        <!-- Vùng thùng chưa bắt đầu vận chuyển -->
+        <div class="pending-section" id="pendingSection" style="display: none">
+          <div class="pending-header">
+            <div class="pending-icon">⏸️</div>
+            <div class="pending-title">Thùng chờ bắt đầu vận chuyển</div>
+            <div class="pending-count" id="pendingCount">0</div>
+          </div>
+          <div class="pending-containers" id="pendingContainers">
+            <div class="pending-empty">Không có thùng chờ</div>
+          </div>
+        </div>
+
         <div class="stages-wrapper">
           <!-- Công đoạn 1: Bắt đầu vận chuyển -->
           <div class="stage-section" id="stage1" data-stage="1">
             <div class="stage-header">
               <div class="stage-icon">🚚</div>
-              <div class="stage-name">Hoàn thành vận chuyển</div>
+              <div class="stage-name">Đang vận chuyển</div>
               <div class="stage-count">0</div>
             </div>
             <div class="stage-ladles" id="stage1-ladles">
@@ -1835,6 +2065,21 @@
                 >→</span
               >
               <span id="modalDiemDen" style="color: var(--success-green)"
+                >-</span
+              >
+            </div>
+            <div
+              style="
+                font-size: 0.75rem;
+                color: var(--text-muted);
+                margin-top: 6px;
+                font-family: &quot;Orbitron&quot;, sans-serif;
+              "
+            >
+              📅 Ngày ca sản xuất:
+              <span
+                id="modalNgayCaSanXuat"
+                style="color: var(--accent-cyan); font-weight: 600"
                 >-</span
               >
             </div>
@@ -2223,6 +2468,19 @@
             ✏️ Chỉnh Sửa
           </button>
           <button
+            class="modal-btn modal-btn-cancel"
+            onclick="showChangeDestinationModal()"
+            id="changeDestBtn"
+            style="
+              background: linear-gradient(135deg, #ff9800, #f57c00);
+              border: none;
+              color: white;
+              display: none;
+            "
+          >
+            🔄 Chuyển Thùng
+          </button>
+          <button
             class="modal-btn modal-btn-confirm"
             id="confirmKRBtn"
             onclick="confirmEnterKR()"
@@ -2236,10 +2494,23 @@
             🔥 Xác Nhận Vào KR
           </button>
           <button
+            class="modal-btn modal-btn-cancel"
+            onclick="showProcessLaundleModal()"
+            id="processLaundleBtn"
+            style="
+              background: linear-gradient(135deg, #4caf50, #388e3c);
+              border: none;
+              color: white;
+              display: none;
+            "
+          >
+            ♻️ Xử Lý Thùng
+          </button>
+          <button
             class="modal-btn modal-btn-confirm"
             onclick="confirmCompleteStage()"
           >
-            ✓ Xác Nhận Hoàn Tất
+            ✓ Xác Nhận Hoàn thành Công Đoạn
           </button>
         </div>
       </div>
@@ -2273,12 +2544,119 @@
                 "
                 >Số Thùng Gang</label
               >
-              <input
-                type="text"
+              <select
                 id="editSoThung"
-                placeholder="VD: 01"
-                style="width: 100%"
-              />
+                style="
+                  width: 100%;
+                  padding: 10px;
+                  border-radius: 6px;
+                  border: 1px solid #444;
+                  background: #2a2a2a;
+                  color: #fff;
+                  font-size: 0.95rem;
+                "
+              >
+                <option value="">-- Chọn số thùng --</option>
+                <option value="01">01</option>
+                <option value="02">02</option>
+                <option value="03">03</option>
+                <option value="04">04</option>
+                <option value="05">05</option>
+                <option value="06">06</option>
+                <option value="07">07</option>
+                <option value="08">08</option>
+                <option value="09">09</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+                <option value="25">25</option>
+                <option value="26">26</option>
+                <option value="27">27</option>
+                <option value="28">28</option>
+                <option value="29">29</option>
+                <option value="30">30</option>
+                <option value="31">31</option>
+                <option value="32">32</option>
+                <option value="33">33</option>
+                <option value="34">34</option>
+                <option value="35">35</option>
+                <option value="36">36</option>
+                <option value="37">37</option>
+                <option value="38">38</option>
+                <option value="39">39</option>
+                <option value="40">40</option>
+                <option value="41">41</option>
+                <option value="42">42</option>
+                <option value="43">43</option>
+                <option value="44">44</option>
+                <option value="45">45</option>
+                <option value="46">46</option>
+                <option value="47">47</option>
+                <option value="48">48</option>
+                <option value="49">49</option>
+                <option value="50">50</option>
+                <option value="51">51</option>
+                <option value="52">52</option>
+                <option value="53">53</option>
+                <option value="54">54</option>
+                <option value="55">55</option>
+                <option value="56">56</option>
+                <option value="57">57</option>
+                <option value="58">58</option>
+                <option value="59">59</option>
+                <option value="60">60</option>
+                <option value="61">61</option>
+                <option value="62">62</option>
+                <option value="63">63</option>
+                <option value="64">64</option>
+                <option value="65">65</option>
+                <option value="66">66</option>
+                <option value="67">67</option>
+                <option value="68">68</option>
+                <option value="69">69</option>
+                <option value="70">70</option>
+                <option value="71">71</option>
+                <option value="72">72</option>
+                <option value="73">73</option>
+                <option value="74">74</option>
+                <option value="75">75</option>
+                <option value="76">76</option>
+                <option value="77">77</option>
+                <option value="78">78</option>
+                <option value="79">79</option>
+                <option value="80">80</option>
+                <option value="81">81</option>
+                <option value="82">82</option>
+                <option value="83">83</option>
+                <option value="84">84</option>
+                <option value="85">85</option>
+                <option value="86">86</option>
+                <option value="87">87</option>
+                <option value="88">88</option>
+                <option value="89">89</option>
+                <option value="90">90</option>
+                <option value="91">91</option>
+                <option value="92">92</option>
+                <option value="93">93</option>
+                <option value="94">94</option>
+                <option value="95">95</option>
+                <option value="96">96</option>
+                <option value="97">97</option>
+                <option value="98">98</option>
+                <option value="99">99</option>
+              </select>
             </div>
 
             <!-- Điểm Đầu -->
@@ -2446,6 +2824,201 @@
       </div>
     </div>
 
+    <!-- Modal chuyển thùng (Stage 2 only) -->
+    <div class="modal-overlay" id="changeDestinationModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div
+            class="modal-icon"
+            style="background: linear-gradient(135deg, #ff9800, #f57c00)"
+          >
+            🔄
+          </div>
+          <div class="modal-title">Chuyển Điểm Đến Thùng</div>
+        </div>
+        <div class="modal-body">
+          <p
+            style="
+              margin-bottom: 15px;
+              color: var(--text-secondary);
+              font-size: 0.95rem;
+            "
+          >
+            Thùng
+            <strong id="changeDestThungSo" style="color: var(--accent-cyan)"
+              >-</strong
+            >
+            hiện đang đến
+            <strong id="changeDestCurrent" style="color: var(--primary-orange)"
+              >-</strong
+            >. <br />Chọn điểm đến mới:
+          </p>
+
+          <div
+            class="radio-group"
+            style="gap: 10px; flex-direction: column; margin-top: 15px"
+          >
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="newDestination"
+                value="HRC1"
+                id="newDestHRC1"
+              />
+              <span style="font-weight: 500">🔥 HRC1</span>
+            </label>
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="newDestination"
+                value="HRC2"
+                id="newDestHRC2"
+              />
+              <span style="font-weight: 500">🔥 HRC2</span>
+            </label>
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="newDestination"
+                value="Đúc gang"
+                id="newDestDucGang"
+              />
+              <span style="font-weight: 500">🏭 Đúc gang</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button
+            class="modal-btn modal-btn-cancel"
+            onclick="closeChangeDestinationModal()"
+          >
+            ✕ Hủy
+          </button>
+          <button
+            class="modal-btn modal-btn-confirm"
+            style="background: linear-gradient(135deg, #ff9800, #f57c00)"
+            onclick="confirmChangeDestination()"
+          >
+            🔄 Xác Nhận Chuyển
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal xử lý thùng tại Stage 6 (Ra LT) -->
+    <div class="modal-overlay" id="processLaundleModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div
+            class="modal-icon"
+            style="background: linear-gradient(135deg, #4caf50, #388e3c)"
+          >
+            ♻️
+          </div>
+          <div class="modal-title">Xử Lý Thùng Ra Luyện Thép</div>
+        </div>
+        <div class="modal-body">
+          <p
+            style="
+              margin-bottom: 15px;
+              color: var(--text-secondary);
+              font-size: 0.95rem;
+            "
+          >
+            Thùng
+            <strong id="processThungSo" style="color: var(--accent-cyan)"
+              >-</strong
+            >
+            đã hoàn tất hành trình. <br />Chọn điểm đến cho chu kỳ tiếp theo:
+          </p>
+
+          <div
+            class="radio-group"
+            style="gap: 10px; flex-direction: column; margin-top: 15px"
+          >
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="nextCycleDestination"
+                value="Lò Cao 1"
+                id="nextDestLC1"
+              />
+              <span style="font-weight: 500">🔥 Lò Cao 1</span>
+            </label>
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="nextCycleDestination"
+                value="Lò Cao 2"
+                id="nextDestLC2"
+              />
+              <span style="font-weight: 500">🔥 Lò Cao 2</span>
+            </label>
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="nextCycleDestination"
+                value="Lò Cao 3"
+                id="nextDestLC3"
+              />
+              <span style="font-weight: 500">🔥 Lò Cao 3</span>
+            </label>
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="nextCycleDestination"
+                value="Lò Cao 4"
+                id="nextDestLC4"
+              />
+              <span style="font-weight: 500">🔥 Lò Cao 4</span>
+            </label>
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="nextCycleDestination"
+                value="Lò Cao 5"
+                id="nextDestLC5"
+              />
+              <span style="font-weight: 500">🔥 Lò Cao 5</span>
+            </label>
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="nextCycleDestination"
+                value="Lò Cao 6"
+                id="nextDestLC6"
+              />
+              <span style="font-weight: 500">🔥 Lò Cao 6</span>
+            </label>
+            <label class="radio-label" style="margin-bottom: 0">
+              <input
+                type="radio"
+                name="nextCycleDestination"
+                value="Bảo Dưỡng"
+                id="nextDestBD"
+              />
+              <span style="font-weight: 500">🛠️ Bảo Dưỡng</span>
+            </label>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button
+            class="modal-btn modal-btn-cancel"
+            onclick="closeProcessLaundleModal()"
+          >
+            ✕ Hủy
+          </button>
+          <button
+            class="modal-btn modal-btn-confirm"
+            style="background: linear-gradient(135deg, #4caf50, #388e3c)"
+            onclick="confirmProcessLaundle()"
+          >
+            ♻️ Xác Nhận Xử Lý
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal đăng nhập -->
     <div class="modal-overlay" id="loginModal">
       <div class="modal-content">
@@ -2488,6 +3061,7 @@
 
     <script>
       let transports = [];
+      let pendingContainers = []; // Danh sách thùng chưa có giờ bắt đầu vận chuyển
       let history = [];
       let filteredHistory = [];
       let transportId = 0;
@@ -2566,26 +3140,13 @@
             diemDen,
           });
 
-          // 🔹 Sau khi tạo thành công → add vào sơ đồ vận hành
-          const startTime = parseDateSafe(created.NgayTao) || new Date();
-
-          transports.push({
+          // 🔹 Sau khi tạo thành công → add vào vùng chờ bắt đầu vận chuyển
+          pendingContainers.push({
             id: created.ID,
             soThung: created.SoThung,
             diemDau: created.DiemDau ?? "",
             diemDen: created.DiemDen ?? "",
-            currentStage: 1,
-            stageStartTime: startTime,
-            stageStatus: "processing",
-            stageTimes: {
-              stage1: startTime,
-              stage2: null,
-              stage3: null,
-              stage4: null,
-              stage5: null,
-              stage6: null,
-              stage7: null,
-            },
+            ngayTao: parseDateSafe(created.NgayTao) || new Date(),
             tphh: {
               me: created.Me ?? "-",
               khoiLuong: created.KhoiLuong ?? null,
@@ -2599,9 +3160,6 @@
           });
 
           updateDisplay();
-
-          // BẮT BUỘC GỌI
-          processStage(created.ID);
 
           // reset input
           document.getElementById("soThung").value = "";
@@ -2824,14 +3382,17 @@
 
       /**
        * Xác nhận xóa thùng gang
-       * - Xóa khỏi danh sách transports
+       * - Xóa khỏi danh sách transports hoặc pendingContainers
        * - Cập nhật lại giao diện
        */
       function confirmDelete() {
         if (pendingDeleteId === null) return;
 
-        // Xóa transport khỏi danh sách
+        // Xóa transport khỏi danh sách transports hoặc pendingContainers
         transports = transports.filter((t) => t.id !== pendingDeleteId);
+        pendingContainers = pendingContainers.filter(
+          (c) => c.id !== pendingDeleteId,
+        );
 
         updateDisplay();
         closeDeleteModal();
@@ -2864,6 +3425,8 @@
         document.getElementById("modalThungSo").textContent = transport.soThung;
         document.getElementById("modalDiemDau").textContent = transport.diemDau;
         document.getElementById("modalDiemDen").textContent = transport.diemDen;
+        document.getElementById("modalNgayCaSanXuat").textContent =
+          transport.ngayCaSanXuat || "-";
 
         // 🔹 Hiển thị mốc thời gian cho từng công đoạn
         const isHRC =
@@ -2980,6 +3543,22 @@
           confirmKRBtn.style.display = "none";
         }
 
+        // 🔹 Hiển thị/ẩn nút Chuyển Thùng (chỉ ở công đoạn 2 và có quyền)
+        const changeDestBtn = document.getElementById("changeDestBtn");
+        if (transport.currentStage === 2 && window.__CAN_CONFIRM_STAGE__) {
+          changeDestBtn.style.display = "block";
+        } else {
+          changeDestBtn.style.display = "none";
+        }
+
+        // 🔹 Hiển thị/ẩn nút Xử Lý Thùng (chỉ ở công đoạn 6 và có quyền)
+        const processLaundleBtn = document.getElementById("processLaundleBtn");
+        if (transport.currentStage === 6 && window.__CAN_CONFIRM_STAGE__) {
+          processLaundleBtn.style.display = "block";
+        } else {
+          processLaundleBtn.style.display = "none";
+        }
+
         // 🔹 Hiển thị/ẩn vùng chọn chu kỳ tiếp theo (chỉ ở công đoạn 6)
         // const stage4Section = document.getElementById("stage4NextDestination");
         const modalBody = document.querySelector(".modal-body");
@@ -3023,21 +3602,23 @@
             break;
 
           case 2:
+            const isHRCStage2 =
+              transport.diemDen === "HRC1" || transport.diemDen === "HRC2";
+
             stageStatusDesc.innerHTML =
               "⏳ Thùng gang đã đến và đang <strong>chờ tại gian chờ thép</strong>.<br>" +
               "Thùng đang chờ đến lượt được đưa vào luyện thép.";
-            confirmActionDesc.innerHTML =
-              "Xác nhận khi <strong>đã rót gang xong</strong> vào lò luyện thép và sẵn sàng trả vỏ thùng.<br>" +
-              "Sau khi xác nhận, thùng sẽ chuyển sang công đoạn trả vỏ.";
-            break;
 
-          case 3:
-            stageStatusDesc.innerHTML =
-              "🔥 Thùng gang đã <strong>rót xong</strong> vào lò luyện thép.<br>" +
-              "Thùng trống đang chờ được vận chuyển ra khỏi khu vực luyện thép.";
-            confirmActionDesc.innerHTML =
-              "Xác nhận khi thùng trống <strong>đã ra khỏi khu vực luyện thép</strong>.<br>" +
-              "Sau khi xác nhận, thùng sẽ hoàn tất quy trình và sẵn sàng cho chu kỳ mới.";
+            if (isHRCStage2) {
+              confirmActionDesc.innerHTML =
+                "🔥 <strong>Nút 'Xác nhận vào KR' (màu tím)</strong>: Thùng sẽ đi qua KR trước khi rót gang.<br>" +
+                "✅ <strong>Nút 'Xác nhận hoàn tất' (xanh lá)</strong>: Chuyển thẳng sang rót xong.<br>" +
+                "<em>Chọn nút phù hợp với quy trình thực tế.</em>";
+            } else {
+              confirmActionDesc.innerHTML =
+                "Xác nhận khi <strong>đã rót gang xong</strong> vào lò luyện thép và sẵn sàng trả vỏ thùng.<br>" +
+                "Sau khi xác nhận, thùng sẽ chuyển sang công đoạn trả vỏ.";
+            }
             break;
 
           case 3:
@@ -3077,17 +3658,22 @@
             break;
         }
 
-        // 🔹 Ẩn/hiện nút hoàn tất dựa trên quyền
+        // 🔹 Ẩn/hiện nút hoàn tất dựa trên quyền và công đoạn
         const canConfirm = window.__CAN_CONFIRM_STAGE__;
         const confirmCompleteBtn = document.querySelector(
           "#confirmModal .modal-actions .modal-btn-confirm:not(#confirmKRBtn)",
         );
 
-        // Nếu không có quyền, ẩn nút hoàn tất
-        if (!canConfirm) {
+        // Nếu đã ở công đoạn cuối (Stage 6 hoặc 7), ẩn tất cả nút xác nhận
+        if (transport.currentStage === 6 || transport.currentStage === 7) {
+          if (confirmCompleteBtn) confirmCompleteBtn.style.display = "none";
+          if (editBtn) editBtn.style.display = "none";
+          if (confirmKRBtn) confirmKRBtn.style.display = "none";
+        } else if (!canConfirm) {
+          // Nếu không có quyền, ẩn nút hoàn tất
           if (confirmCompleteBtn) confirmCompleteBtn.style.display = "none";
         } else {
-          // Nếu có quyền, hiển thị nút hoàn tất
+          // Nếu có quyền và chưa hoàn tất, hiển thị nút hoàn tất
           if (confirmCompleteBtn) confirmCompleteBtn.style.display = "block";
         }
 
@@ -3114,6 +3700,202 @@
           .forEach((radio) => {
             radio.checked = false;
           });
+
+        // 🔹 Reset timeline và TPHH về trạng thái hiển thị mặc định
+        const timelineSection = document.querySelector(".timeline-container");
+        const tphhSection = document.getElementById("tphhSection");
+        if (timelineSection) timelineSection.style.display = "";
+        if (tphhSection) tphhSection.style.display = "";
+
+        // 🔹 Reset các nút về trạng thái mặc định
+        const editBtn = document.getElementById("editBtn");
+        const confirmKRBtn = document.getElementById("confirmKRBtn");
+        const changeDestBtn = document.getElementById("changeDestBtn");
+        const processLaundleBtn = document.getElementById("processLaundleBtn");
+        const confirmCompleteBtn = document.querySelector(
+          "#confirmModal .modal-actions .modal-btn-confirm:not(#confirmKRBtn)",
+        );
+
+        if (editBtn) editBtn.style.display = "none";
+        if (confirmKRBtn) confirmKRBtn.style.display = "none";
+        if (changeDestBtn) changeDestBtn.style.display = "none";
+        if (processLaundleBtn) processLaundleBtn.style.display = "none";
+
+        // Reset nút xác nhận về text và onclick mặc định
+        if (confirmCompleteBtn) {
+          confirmCompleteBtn.style.display = "flex";
+          confirmCompleteBtn.innerHTML = "✓ Xác Nhận Hoàn thành Công Đoạn";
+          confirmCompleteBtn.onclick = () => confirmCompleteStage();
+        }
+
+        // 🔹 Reset nội dung mô tả về mặc định
+        const stageStatusDesc = document.getElementById(
+          "stageStatusDescription",
+        );
+        const confirmActionDesc = document.getElementById(
+          "confirmActionDescription",
+        );
+        if (stageStatusDesc) stageStatusDesc.innerHTML = "-";
+        if (confirmActionDesc) confirmActionDesc.innerHTML = "-";
+
+        // 🔹 Reset thông tin thùng
+        document.getElementById("modalThungSo").textContent = "-";
+        document.getElementById("modalDiemDau").textContent = "-";
+        document.getElementById("modalDiemDen").textContent = "-";
+        document.getElementById("modalNgayCaSanXuat").textContent = "-";
+
+        // 🔹 Reset TPHH
+        document.getElementById("tphhMe").textContent = "-";
+        document.getElementById("tphhKhoiLuong").textContent = "-";
+        document.getElementById("tphhNhietDo").textContent = "-";
+        document.getElementById("tphhC").textContent = "-";
+        document.getElementById("tphhSi").textContent = "-";
+        document.getElementById("tphhMn").textContent = "-";
+        document.getElementById("tphhP").textContent = "-";
+        document.getElementById("tphhS").textContent = "-";
+
+        // 🔹 Reset timeline times
+        document.getElementById("timeStage1").textContent = "-";
+        document.getElementById("timeStage2").textContent = "-";
+        document.getElementById("timeStage3").textContent = "-";
+        document.getElementById("timeStage4").textContent = "-";
+        document.getElementById("timeStage5").textContent = "-";
+        document.getElementById("timeStage6").textContent = "-";
+
+        // 🔹 Remove active class từ timeline
+        document.querySelectorAll(".timeline-step").forEach((step) => {
+          step.classList.remove("active");
+        });
+      }
+
+      /**
+       * Hiển thị modal xác nhận cho thùng pending (chưa bắt đầu vận chuyển)
+       */
+      function showPendingConfirmModal(containerId) {
+        const container = pendingContainers.find((c) => c.id === containerId);
+        if (!container) return;
+
+        pendingTransportId = containerId;
+        document.getElementById("modalThungSo").textContent = container.soThung;
+        document.getElementById("modalDiemDau").textContent = container.diemDau;
+        document.getElementById("modalDiemDen").textContent = container.diemDen;
+
+        const timelineSection = document.querySelector(".timeline-container");
+        const tphhSection = document.getElementById("tphhSection");
+        if (timelineSection) timelineSection.style.display = "none";
+        if (tphhSection) tphhSection.style.display = "none";
+
+        const stageStatusDesc = document.getElementById(
+          "stageStatusDescription",
+        );
+        const confirmActionDesc = document.getElementById(
+          "confirmActionDescription",
+        );
+
+        stageStatusDesc.innerHTML =
+          "⏸️ Thùng này đã được tạo nhưng <strong>chưa bắt đầu vận chuyển</strong>.<br>" +
+          "Thùng đang chờ được xác nhận để bắt đầu vận chuyển.";
+
+        confirmActionDesc.innerHTML =
+          "Nhấn <strong>'Bắt đầu vận chuyển'</strong> để xác nhận thùng bắt đầu di chuyển.<br>" +
+          "Hoặc chọn <strong>'Sửa'</strong> để chỉnh sửa thông tin, <strong>'Xóa'</strong> để xóa thùng.";
+
+        const confirmCompleteBtn = document.querySelector(
+          "#confirmModal .modal-actions .modal-btn-confirm:not(#confirmKRBtn)",
+        );
+
+        if (confirmCompleteBtn) {
+          confirmCompleteBtn.style.display = window.__CAN_CONFIRM_STAGE__
+            ? "flex"
+            : "none";
+          confirmCompleteBtn.innerHTML = "<span>🚚 Bắt đầu vận chuyển</span>";
+          confirmCompleteBtn.onclick = () => confirmPendingStart(containerId);
+        }
+
+        const confirmKRBtn = document.getElementById("confirmKRBtn");
+        const changeDestBtn = document.getElementById("changeDestinationBtn");
+        const handleContainerBtn =
+          document.getElementById("handleContainerBtn");
+        if (confirmKRBtn) confirmKRBtn.style.display = "none";
+        if (changeDestBtn) changeDestBtn.style.display = "none";
+        if (handleContainerBtn) handleContainerBtn.style.display = "none";
+
+        const editBtn = document.querySelector(
+          "#confirmModal .modal-actions .modal-btn-edit",
+        );
+        const deleteBtn = document.querySelector(
+          "#confirmModal .modal-actions .modal-btn-delete",
+        );
+
+        if (editBtn) {
+          editBtn.style.display = window.__CAN_EDIT__ ? "flex" : "none";
+          editBtn.onclick = () => showEditPendingModal(containerId);
+        }
+
+        if (deleteBtn) {
+          deleteBtn.style.display = window.__CAN_DELETE__ ? "flex" : "none";
+          deleteBtn.onclick = () => {
+            closeConfirmModal();
+            showDeletePendingModal(containerId);
+          };
+        }
+
+        const rollbackBtn = document.querySelector(
+          "#confirmModal .modal-actions .modal-btn-rollback",
+        );
+        if (rollbackBtn) rollbackBtn.style.display = "none";
+
+        document.getElementById("confirmModal").classList.add("show");
+      }
+
+      async function confirmPendingStart(containerId) {
+        try {
+          const now = getCurrentTimeVN();
+          const payload = { GioBatDau: getISOStringVN(now) };
+          const response = await updateGangNhatTrinh(containerId, payload);
+          closeConfirmModal();
+          await loadDangVanHanhFromApi();
+          alert("✅ Đã bắt đầu vận chuyển thùng gang!");
+        } catch (err) {
+          alert(
+            err?.message ||
+              "❌ Không thể bắt đầu vận chuyển. Vui lòng thử lại.",
+          );
+        }
+      }
+
+      function showEditPendingModal(containerId) {
+        const container = pendingContainers.find((c) => c.id === containerId);
+        if (!container) return;
+        closeConfirmModal();
+        pendingTransportId = containerId;
+        document.getElementById("editSoThung").value = container.soThung;
+        document
+          .querySelectorAll('input[name="editDiemDau"]')
+          .forEach((radio) => {
+            radio.checked = radio.value === container.diemDau;
+          });
+        document
+          .querySelectorAll('input[name="editDiemDen"]')
+          .forEach((radio) => {
+            radio.checked = radio.value === container.diemDen;
+          });
+        document.getElementById("editModal").classList.add("show");
+      }
+
+      function showDeletePendingModal(containerId) {
+        const container = pendingContainers.find((c) => c.id === containerId);
+        if (!container) return;
+        pendingDeleteId = containerId;
+        document.getElementById("deleteModalThungSo").textContent =
+          container.soThung;
+        document.getElementById("deleteModalDiemDau").textContent =
+          container.diemDau;
+        document.getElementById("deleteModalDiemDen").textContent =
+          container.diemDen;
+        document.getElementById("deleteModalStage").textContent =
+          "Chưa bắt đầu vận chuyển";
+        document.getElementById("deleteModal").classList.add("show");
       }
 
       /**
@@ -3165,8 +3947,13 @@
        * @async
        */
       async function saveEdit() {
+        // Tìm thùng trong transports hoặc pendingContainers
         const transport = transports.find((t) => t.id === pendingTransportId);
-        if (!transport) return;
+        const container = pendingContainers.find(
+          (c) => c.id === pendingTransportId,
+        );
+
+        if (!transport && !container) return;
 
         const newSoThung = document.getElementById("editSoThung").value.trim();
 
@@ -3191,8 +3978,10 @@
             DiemDen: newDiemDen,
           };
 
+          const targetId = transport ? transport.id : container.id;
+
           const response = await fetch(
-            `https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/${transport.id}`,
+            `https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/${targetId}`,
             {
               method: "PUT",
               headers: {
@@ -3208,9 +3997,15 @@
           }
 
           // ✅ API update thành công → Cập nhật local state
-          transport.soThung = newSoThung;
-          transport.diemDau = newDiemDau;
-          transport.diemDen = newDiemDen;
+          if (transport) {
+            transport.soThung = newSoThung;
+            transport.diemDau = newDiemDau;
+            transport.diemDen = newDiemDen;
+          } else if (container) {
+            container.soThung = newSoThung;
+            container.diemDau = newDiemDau;
+            container.diemDen = newDiemDen;
+          }
 
           // Cập nhật thông tin hiển thị trên modal xác nhận
           document.getElementById("modalThungSo").textContent = newSoThung;
@@ -3287,6 +4082,245 @@
       }
 
       /**
+       * Hiển thị modal chuyển điểm đến (chỉ ở công đoạn 2)
+       */
+      function showChangeDestinationModal() {
+        const transport = transports.find((t) => t.id === pendingTransportId);
+        if (!transport || transport.currentStage !== 2) {
+          alert("⚠️ Chỉ có thể chuyển điểm đến ở công đoạn 2!");
+          return;
+        }
+
+        // Hiển thị thông tin thùng
+        document.getElementById("changeDestThungSo").textContent =
+          transport.soThung;
+        document.getElementById("changeDestCurrent").textContent =
+          transport.diemDen;
+
+        // Reset và disable radio button của điểm đến hiện tại
+        document
+          .querySelectorAll('input[name="newDestination"]')
+          .forEach((radio) => {
+            radio.checked = false;
+            if (radio.value === transport.diemDen) {
+              radio.disabled = true;
+              radio.parentElement.style.opacity = "0.5";
+            } else {
+              radio.disabled = false;
+              radio.parentElement.style.opacity = "1";
+            }
+          });
+
+        // Hiển thị modal
+        document.getElementById("changeDestinationModal").classList.add("show");
+      }
+
+      /**
+       * Đóng modal chuyển điểm đến
+       */
+      function closeChangeDestinationModal() {
+        document
+          .getElementById("changeDestinationModal")
+          .classList.remove("show");
+
+        // Reset radio buttons
+        document
+          .querySelectorAll('input[name="newDestination"]')
+          .forEach((radio) => {
+            radio.checked = false;
+            radio.disabled = false;
+            radio.parentElement.style.opacity = "1";
+          });
+      }
+
+      /**
+       * Xác nhận thay đổi điểm đến (ở công đoạn 2)
+       * - Validate điểm đến mới
+       * - Gọi API cập nhật DiemDen
+       * - Refresh danh sách
+       * @async
+       */
+      async function confirmChangeDestination() {
+        if (pendingTransportId === null) return;
+
+        const transport = transports.find((t) => t.id === pendingTransportId);
+        if (!transport) return;
+
+        // Kiểm tra phải ở công đoạn 2
+        if (transport.currentStage !== 2) {
+          alert("⚠️ Chỉ có thể chuyển điểm đến ở công đoạn 2!");
+          return;
+        }
+
+        // Lấy điểm đến mới
+        const newDestination = document.querySelector(
+          'input[name="newDestination"]:checked',
+        )?.value;
+        if (!newDestination) {
+          alert("⚠️ Vui lòng chọn điểm đến mới!");
+          return;
+        }
+
+        if (newDestination === transport.diemDen) {
+          alert("⚠️ Điểm đến mới trùng với điểm đến hiện tại!");
+          return;
+        }
+
+        try {
+          const now = getCurrentTimeVN();
+
+          // Tạo payload cập nhật với DiemTrungGian, GioTrungGian, và DiemDen mới
+          const payload = {
+            DiemTrungGian: transport.diemDen, // Lưu điểm đến cũ vào điểm trung gian
+            GioTrungGian: getISOStringVN(now), // Lưu giờ thao tác chuyển
+            DiemDen: newDestination, // Cập nhật điểm đến mới
+            SoThung: transport.soThung,
+            DiemDau: transport.diemDau,
+          };
+
+          const response = await fetch(
+            `https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/${transport.id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            },
+          );
+
+          if (!response.ok) {
+            const err = await response.json();
+            throw err;
+          }
+
+          // Cập nhật local state
+          transport.diemDen = newDestination;
+
+          // Cập nhật modal xác nhận nếu đang hiển thị
+          document.getElementById("modalDiemDen").textContent = newDestination;
+
+          // Đóng cả 2 modal và reload
+          closeChangeDestinationModal();
+          closeConfirmModal();
+          await loadDangVanHanhFromApi();
+
+          alert(
+            `✅ Đã chuyển điểm đến thành công!\nThùng ${transport.soThung} từ ${payload.DiemTrungGian} → ${newDestination}`,
+          );
+        } catch (err) {
+          console.error("Change destination error:", err);
+          alert(err?.message || "❌ Không thể chuyển điểm đến");
+        }
+      }
+
+      /**
+       * Hiển thị modal xử lý thùng tại Stage 6 (Ra LT)
+       */
+      function showProcessLaundleModal() {
+        const transport = transports.find((t) => t.id === pendingTransportId);
+        if (!transport || transport.currentStage !== 6) {
+          alert("⚠️ Chỉ có thể xử lý thùng ở công đoạn Ra Luyện Thép!");
+          return;
+        }
+
+        // Hiển thị thông tin thùng
+        document.getElementById("processThungSo").textContent =
+          transport.soThung;
+
+        // Reset radio buttons
+        document
+          .querySelectorAll('input[name="nextCycleDestination"]')
+          .forEach((radio) => {
+            radio.checked = false;
+          });
+
+        // Hiển thị modal
+        document.getElementById("processLaundleModal").classList.add("show");
+      }
+
+      /**
+       * Đóng modal xử lý thùng
+       */
+      function closeProcessLaundleModal() {
+        document.getElementById("processLaundleModal").classList.remove("show");
+
+        // Reset radio buttons
+        document
+          .querySelectorAll('input[name="nextCycleDestination"]')
+          .forEach((radio) => {
+            radio.checked = false;
+          });
+      }
+
+      /**
+       * Xác nhận xử lý thùng tại Stage 6
+       * - Validate điểm đến tiếp theo
+       * - Gọi API cập nhật chu kỳ tiếp theo
+       * - Refresh danh sách
+       * @async
+       */
+      async function confirmProcessLaundle() {
+        if (pendingTransportId === null) return;
+
+        const transport = transports.find((t) => t.id === pendingTransportId);
+        if (!transport) return;
+
+        // Kiểm tra phải ở công đoạn 6
+        if (transport.currentStage !== 6) {
+          alert("⚠️ Chỉ có thể xử lý thùng ở công đoạn Ra Luyện Thép!");
+          return;
+        }
+
+        // Lấy điểm đến tiếp theo
+        const nextDestination = document.querySelector(
+          'input[name="nextCycleDestination"]:checked',
+        )?.value;
+        if (!nextDestination) {
+          alert("⚠️ Vui lòng chọn điểm đến cho chu kỳ tiếp theo!");
+          return;
+        }
+
+        try {
+          const now = getCurrentTimeVN();
+
+          // Tạo payload QuayThung
+          const payload = {
+            QuayThung: nextDestination, // Vị trí quay thùng về
+          };
+
+          const response = await fetch(
+            `https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/${transport.id}`,
+            {
+              method: "PUT",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(payload),
+            },
+          );
+
+          if (!response.ok) {
+            const err = await response.json();
+            throw err;
+          }
+
+          // Đóng modal và reload
+          closeProcessLaundleModal();
+          closeConfirmModal();
+          await loadDangVanHanhFromApi();
+          loadGhiChepChatGang();
+
+          alert(
+            `✅ Đã xử lý thùng thành công!\nThùng ${transport.soThung} sẽ được kéo về ${nextDestination}`,
+          );
+        } catch (err) {
+          console.error("Process laundle error:", err);
+          alert(err?.message || "❌ Không thể xử lý thùng");
+        }
+      }
+
+      /**
        * Xác nhận hoàn thành công đoạn hiện tại
        * - Validate thời gian xác nhận
        * - Gọi API cập nhật trạng thái công đoạn
@@ -3338,14 +4372,11 @@
             // Thêm thông tin chu kỳ tiếp theo
             payload.DiemDauTiepTheo = nextDestination;
           } else if (stage === 2) {
-            // 🔹 Công đoạn 2: Khi xác nhận hoàn tất (không vào KR) → Skip stage 3, 4, đến stage 5
-            const isHRC =
-              transport.diemDen === "HRC1" || transport.diemDen === "HRC2";
-            if (!isHRC) {
-              payload = { GioRotXong: getISOStringVN(now) }; // Skip đến stage 5
-            } else {
-              payload = buildUpdatePayloadByStage(stage, now); // HRC: stage 2 → 3
-            }
+            // 🔹 Công đoạn 2: Khi xác nhận hoàn tất (KHÔNG vào KR)
+            // → Skip stage 3, chuyển thẳng sang stage 5 (Rót xong)
+            // 📌 LƯU Ý: Nút "Xác nhận vào KR" (confirmEnterKR) mới chuyển sang stage 3
+            //          Nút "Xác nhận hoàn tất" này luôn skip stage 3
+            payload = { GioRotXong: getISOStringVN(now) }; // Cả HRC và không HRC đều skip stage 3
           } else {
             // 🔹 Build payload đúng công đoạn (bình thường)
             payload = buildUpdatePayloadByStage(stage, now);
@@ -3620,6 +4651,13 @@
                                           t.diemDen
                                         }</strong></span>
                                       </div>
+                                      ${
+                                        t.quayThung
+                                          ? `<div style="font-size: 0.75rem; color: var(--success-green); margin-top: 4px; font-weight: 600;">
+                                          ♻️ Quay về: ${t.quayThung}
+                                        </div>`
+                                          : ""
+                                      }
                                       <div class="ladle-time">${timeStr}</div>
                                       <span class="ladle-status ${statusBadgeClass}">${statusText}</span>
                                   </div>
@@ -3629,6 +4667,9 @@
               .join("");
           }
         });
+
+        // Render pending containers
+        renderPendingContainers();
       }
 
       /**
@@ -3674,6 +4715,70 @@
               `,
           )
           .join("");
+      }
+
+      /**
+       * Render danh sách thùng chưa bắt đầu vận chuyển
+       * - Hiển thị thông tin số thùng, điểm đầu/đến
+       * - Cho phép click để xem/xác nhận bắt đầu vận chuyển
+       */
+      function renderPendingContainers() {
+        const pendingSection = document.getElementById("pendingSection");
+        const pendingCountEl = document.getElementById("pendingCount");
+        const pendingContainersEl =
+          document.getElementById("pendingContainers");
+
+        // Cập nhật số lượng
+        pendingCountEl.textContent = pendingContainers.length;
+
+        // Hiển thị/ẩn section
+        if (pendingContainers.length === 0) {
+          pendingSection.style.display = "none";
+        } else {
+          pendingSection.style.display = "block";
+
+          // Render danh sách thùng
+          pendingContainersEl.innerHTML = pendingContainers
+            .map((item) => {
+              const ngayTaoStr = item.ngayTao
+                ? new Date(item.ngayTao).toLocaleString("vi-VN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "-";
+
+              return `
+                <div class="pending-item" onclick="showPendingConfirmModal(${item.id})">
+                  <div class="pending-item-header">
+                    <div class="pending-item-number">${item.soThung.replace(/\D/g, "")}</div>
+                    <div class="pending-item-icon">⏸️</div>
+                  </div>
+                  <div class="pending-item-info">
+                    <div>
+                      <span style="color: var(--text-muted);">Thùng:</span>
+                      <span style="color: var(--text-primary); font-weight: 600;">${item.soThung}</span>
+                    </div>
+                    <div>
+                      <span style="color: var(--text-muted);">Từ:</span>
+                      <span style="color: var(--accent-cyan);">${item.diemDau}</span>
+                    </div>
+                    <div>
+                      <span style="color: var(--text-muted);">Đến:</span>
+                      <span style="color: var(--success-green);">${item.diemDen}</span>
+                    </div>
+                    <div>
+                      <span style="color: var(--text-muted);">Tạo:</span>
+                      <span style="font-size: 0.75rem;">${ngayTaoStr}</span>
+                    </div>
+                  </div>
+                </div>
+              `;
+            })
+            .join("");
+        }
       }
 
       // Đóng modal khi click bên ngoài
@@ -3732,6 +4837,7 @@
           // Lấy filter lò cao từ tham số hoặc localStorage
           const loCaoFilter = idLoCao || getLoCaoId();
           const hrcFilter = getHrcId(); // 🔹 Lấy filter HRC từ localStorage
+          const isNMFilter = getIsNM(); // 🔹 Lấy filter isNM từ localStorage (DIEUDO1/DIEUDO2)
 
           // 🔹 Gọi API latest để lấy dữ liệu ngày ca sản xuất mới nhất
           const apiUrl =
@@ -3756,8 +4862,42 @@
             );
           }
 
-          // Chuyển đổi dữ liệu sang cấu trúc hiển thị
-          transports = runningData
+          // 🔹 Filter theo isNM nếu có (DIEUDO1 = 1, DIEUDO2 = 2)
+          if (isNMFilter) {
+            runningData = runningData.filter(
+              (item) => item.isNM === parseInt(isNMFilter),
+            );
+          }
+
+          // Phân loại thùng: pending (chưa có GioBatDau) và đang vận hành
+          const pendingData = [];
+          const activeData = [];
+
+          runningData.forEach((item) => {
+            const gioBatDau = parseDateSafe(item.GioBatDau);
+            if (!gioBatDau) {
+              pendingData.push(item);
+            } else {
+              activeData.push(item);
+            }
+          });
+
+          // Xử lý thùng pending
+          pendingContainers = pendingData.map((item) => ({
+            id: item.ID,
+            soThung: item.SoThung,
+            diemDau: item.DiemDau ?? "",
+            diemDen: item.DiemDen ?? "",
+            ngayTao: parseDateSafe(item.NgayTao),
+            tphh: {
+              me: item.Me ?? "-",
+              khoiLuong: item.KhoiLuong ?? null,
+              nhietDoThung: item.NhietDoThung ?? "-",
+            },
+          }));
+
+          // Chuyển đổi dữ liệu sang cấu trúc hiển thị cho thùng đang vận hành
+          transports = activeData
             .map((item) => {
               const stageInfo = detectCurrentStage(item);
               if (!stageInfo) return null;
@@ -3767,6 +4907,9 @@
                 soThung: item.SoThung,
                 diemDau: item.DiemDau ?? "",
                 diemDen: item.DiemDen ?? "",
+                quayThung: item.QuayThung ?? null, // Lưu thông tin điểm quay về
+                ngayCaSanXuat:
+                  item.CaSX + " - " + formatDate(item.NgaySX) ?? null, // Lưu ngày ca sản xuất
                 currentStage: stageInfo.stage,
                 stageStartTime: stageInfo.startTime,
                 stageStatus: "waiting-confirm",
@@ -3831,16 +4974,16 @@
         const isDucGang =
           item.DiemDen === "DUCGANG" || item.DiemDen === "Đúc gang";
 
-        // 🔴 ƯU TIÊN MỐC CAO NHẤT
-        // Stage 6 & 7 đều hiển thị ở vùng stage6
-        if (gioDucGang) {
-          return { stage: 6, startTime: gioDucGang, displayStage: 7 };
+        // 🔴 Nếu TinhTrang = 1 → Hiển thị ở stage 6 (Hoàn tất)
+        if (item.TinhTrang === 1) {
+          // Xác định displayStage: 7 nếu có GioDucGang, 6 nếu có GioRaLT
+          const displayStage = gioDucGang ? 7 : 6;
+          const startTime =
+            gioDucGang || gioRaLT || gioRotXong || getCurrentTimeVN();
+          return { stage: 6, startTime: startTime, displayStage: displayStage };
         }
 
-        if (gioRaLT) {
-          return { stage: 6, startTime: gioRaLT, displayStage: 6 };
-        }
-
+        // 🔴 TinhTrang = 0 hoặc null → Logic bình thường theo mốc thời gian
         if (gioRotXong) {
           return { stage: 5, startTime: gioRotXong };
         }
@@ -3863,7 +5006,7 @@
           return { stage: 1, startTime: gioBatDau };
         }
 
-        // HOÀN TẤT → KHÔNG HIỂN THỊ
+        // CHƯA CÓ GIỜ BẮT ĐẦU → KHÔNG HIỂN THỊ (sẽ ở pending)
         return null;
       }
 
@@ -3872,7 +5015,7 @@
         const payload = {
           SoThung: soThung,
           NgayTao: getISOStringVN(vnNow), // YYYY-MM-DD
-          GioBatDau: getISOStringVN(vnNow),
+          // GioBatDau: getISOStringVN(vnNow),
           DiemDau: diemDau,
           DiemDen: diemDen,
         };
@@ -3955,6 +5098,7 @@
           const soThung = document.getElementById("filterThungSo").value.trim();
           const loCaoId = getLoCaoId(); // 🔹 Lấy filter lò cao từ mã đăng nhập
           const hrcId = getHrcId(); // 🔹 Lấy filter HRC từ mã đăng nhập
+          const isNMId = getIsNM(); // 🔹 Lấy filter isNM từ mã đăng nhập (DIEUDO1/DIEUDO2)
 
           const params = new URLSearchParams();
 
@@ -3975,6 +5119,11 @@
           if (hrcId) {
             const hrcName = `HRC${hrcId}`;
             data = data.filter((item) => item.DiemDen === hrcName);
+          }
+
+          // 🔹 Filter theo isNM nếu có (DIEUDO1 = 1, DIEUDO2 = 2)
+          if (isNMId) {
+            data = data.filter((item) => item.isNM === parseInt(isNMId));
           }
 
           renderHistoryTable(data);
@@ -4203,6 +5352,7 @@
       const ROLE_KEY = "GANG_ROLE"; // localStorage key
       const LOCAO_KEY = "GANG_LOCAO_ID"; // localStorage key cho lò cao
       const HRC_KEY = "GANG_HRC_ID"; // localStorage key cho HRC1/HRC2
+      const ISNM_KEY = "GANG_ISNM_ID"; // localStorage key cho isNM (DIEUDO1/DIEUDO2)
 
       const ROLES = {
         TRUONGKIP: "TRUONGKIP",
@@ -4242,6 +5392,18 @@
         }
       }
 
+      function getIsNM() {
+        return localStorage.getItem(ISNM_KEY);
+      }
+
+      function setIsNM(id) {
+        if (id) {
+          localStorage.setItem(ISNM_KEY, id);
+        } else {
+          localStorage.removeItem(ISNM_KEY);
+        }
+      }
+
       function submitLoginCode() {
         const code = document
           .getElementById("loginCode")
@@ -4252,25 +5414,37 @@
         const locaoMatch = code.match(/^LOCAO([1-6])$/);
         // 🔹 Kiểm tra mã HRC1-HRC2
         const hrcMatch = code.match(/^HRC([1-2])$/);
+        // 🔹 Kiểm tra mã DIEUDO1-DIEUDO2
+        const dieuDoMatch = code.match(/^DIEUDO([1-2])$/);
 
         if (locaoMatch) {
           const loCaoId = locaoMatch[1];
           setRole(ROLES.DIEUDO); // Mã lò cao chỉ có quyền điều độ
           setLoCaoId(loCaoId);
           setHrcId(null); // Xóa filter HRC nếu có
+          setIsNM(null); // Xóa filter isNM nếu có
         } else if (hrcMatch) {
           const hrcId = hrcMatch[1]; // "1" hoặc "2"
           setRole(ROLES.DIEUDO); // Mã HRC chỉ có quyền điều độ
           setHrcId(hrcId);
           setLoCaoId(null); // Xóa filter lò cao nếu có
+          setIsNM(null); // Xóa filter isNM nếu có
+        } else if (dieuDoMatch) {
+          const isNMId = dieuDoMatch[1]; // "1" hoặc "2"
+          setRole(ROLES.DIEUDO); // Mã DIEUDO1/DIEUDO2 có quyền điều độ
+          setIsNM(isNMId); // Lưu isNM = 1 hoặc 2
+          setLoCaoId(null); // Xóa filter lò cao nếu có
+          setHrcId(null); // Xóa filter HRC nếu có
         } else if (code === ROLES.TRUONGKIP || code === ROLES.DIEUDO) {
           setRole(code);
           setLoCaoId(null); // Xóa filter lò cao nếu có
           setHrcId(null); // Xóa filter HRC nếu có
+          setIsNM(null); // Xóa filter isNM nếu có
         } else {
           setRole(ROLES.VIEW);
           setLoCaoId(null); // Xóa filter lò cao nếu có
           setHrcId(null); // Xóa filter HRC nếu có
+          setIsNM(null); // Xóa filter isNM nếu có
         }
 
         document.getElementById("loginModal").classList.remove("show");
@@ -4284,6 +5458,7 @@
       function applyRolePermission() {
         const role = getCurrentRole();
         const hrcId = getHrcId();
+        const isNMId = getIsNM();
 
         // Hiện / ẩn nút logout
         // const logoutBtn = document.getElementById("logoutBtn");
@@ -4291,13 +5466,13 @@
         //   logoutBtn.style.display = role === ROLES.VIEW ? "none" : "block";
         // }
 
-        // 🔹 Phân bổ vận chuyển (CHỈ TRƯỞNG KÍP)
+        // 🔹 Phân bổ vận chuyển (TRƯỞNG KÍP + DIEUDO1/DIEUDO2)
         const phanBoSection = document.querySelector(".section"); // section đầu
         const btnBatDau = document.querySelector(
           'button[onclick="batDauVanChuyen()"]',
         );
 
-        if (role === ROLES.TRUONGKIP) {
+        if (role === ROLES.TRUONGKIP || isNMId) {
           phanBoSection.style.display = "";
           if (btnBatDau) btnBatDau.disabled = false;
         } else {
@@ -4310,23 +5485,38 @@
         const stage4Section = document.getElementById("stage4"); // Ra KR
         const stage6Section = document.getElementById("stage6"); // Hoàn tất
         const stagesWrapper = document.querySelector(".stages-wrapper");
+        const loCaoId = getLoCaoId();
 
-        // 🔹 VIEW và TRUONGKIP: Hiển thị tất cả công đoạn (gang + HRC)
+        // 🔹 VIEW và TRUONGKIP: Hiển thị tất cả công đoạn
         if (role === ROLES.VIEW || role === ROLES.TRUONGKIP) {
           if (stage1Section) stage1Section.style.display = "";
           if (stage3Section) stage3Section.style.display = "";
           if (stage4Section) stage4Section.style.display = "";
           if (stage6Section) stage6Section.style.display = "";
           if (stagesWrapper) stagesWrapper.classList.remove("hrc-horizontal");
+        } else if (role === ROLES.DIEUDO && !loCaoId && !hrcId && !isNMId) {
+          // 🔹 DIEUDO TOÀN BỘ: Ẩn công đoạn Vào KR và Ra KR
+          if (stage1Section) stage1Section.style.display = "";
+          if (stage3Section) stage3Section.style.display = "none";
+          if (stage4Section) stage4Section.style.display = "none";
+          if (stage6Section) stage6Section.style.display = "";
+          if (stagesWrapper) stagesWrapper.classList.remove("hrc-horizontal");
+        } else if (isNMId) {
+          // 🔹 DIEUDO1 hoặc DIEUDO2: Ẩn công đoạn Vào KR và Ra KR
+          if (stage1Section) stage1Section.style.display = "";
+          if (stage3Section) stage3Section.style.display = "none";
+          if (stage4Section) stage4Section.style.display = "none";
+          if (stage6Section) stage6Section.style.display = "";
+          if (stagesWrapper) stagesWrapper.classList.remove("hrc-horizontal");
         } else if (hrcId) {
-          // HRC (DIEUDO): Chỉ hiển thị stage 2, 3, 4, 5 (Vào gian chờ -> Vào KR -> Ra KR -> Rót xong)
+          // HRC filter: Chỉ hiển thị stage 2, 3, 4, 5 (Vào gian chờ -> Vào KR -> Ra KR -> Rót xong)
           if (stage1Section) stage1Section.style.display = "none";
           if (stage3Section) stage3Section.style.display = "";
           if (stage4Section) stage4Section.style.display = "";
           if (stage6Section) stage6Section.style.display = "none";
           if (stagesWrapper) stagesWrapper.classList.add("hrc-horizontal");
-        } else {
-          // DIEUDO không có HRC: Hiện stage 1, ẩn stage 3, 4 (KR)
+        } else if (loCaoId) {
+          // Lò Cao filter: Hiện stage 1, ẩn stage 3, 4 (KR)
           if (stage1Section) stage1Section.style.display = "";
           if (stage3Section) stage3Section.style.display = "none";
           if (stage4Section) stage4Section.style.display = "none";
@@ -4349,6 +5539,7 @@
         localStorage.removeItem("GANG_ROLE");
         localStorage.removeItem("GANG_LOCAO_ID");
         localStorage.removeItem("GANG_HRC_ID");
+        localStorage.removeItem("GANG_ISNM_ID");
 
         if (autoRefreshTimer) {
           clearInterval(autoRefreshTimer);
