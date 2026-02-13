@@ -1,5 +1,72 @@
 === LOG THAY ĐỔI HỆ THỐNG NHẬT TRÌNH GANG ===
 
+[2026-01-29] CẬP NHẬT API MỚI - 8 CÔNG ĐOẠN ĐẦY ĐỦ
+
+1. API MỚI
+   Endpoint: https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/latest
+   
+   Dữ liệu trả về:
+   - ID, SoThung, NgayTao, NgaySX, CaSX
+   - G_BatDauRot: Bắt đầu rót gang
+   - G_RotDayThung: Rót đầy thùng
+   - GioBatDau: Bắt đầu vận chuyển
+   - GioVaoLT: Đến gian chờ luyện thép
+   - GioVaoKR: Vào KR
+   - GioRaKR: Ra KR
+   - GioRotXong: Rót xong vào LT
+   - GioRaLT: Ra luyện thép
+   - DiemDau, DiemDen, KL_XeGong, KhoiLuong
+   - Me, Mac, TinhTrang, ThuTu
+   - Chemistry: C, Si, Mn, S, P, Ti
+   - NhietDoThung, Temp, QuayThung
+   - ID_LoCao, ID_GiaoNhan, isNM
+
+2. 8 CÔNG ĐOẠN HIỂN THỊ
+   Stage 1: Bắt đầu rót gang (G_BatDauRot / T_BatDauRot)
+   Stage 2: Rót đầy thùng (G_RotDayThung)
+   Stage 3: Bắt đầu vận chuyển (GioBatDau)
+   Stage 4: Đến gian chờ luyện thép (GioVaoLT)
+   Stage 5: Vào KR (GioVaoKR)
+   Stage 6: Ra KR (GioRaKR)
+   Stage 7: Rót xong vào LT (GioRotXong)
+   Stage 8: Ra luyện thép (GioRaLT)
+
+3. LOGIC HIỂN THỊ
+   - Sơ đồ vận hành hiển thị 8 sections
+   - Mỗi thùng được đặt vào section theo công đoạn cuối cùng có dữ liệu
+   - Trạng thái:
+     * waiting: Chưa bắt đầu (màu xám)
+     * in-progress: Đang thực hiện (màu xanh dương)
+     * completed: Hoàn thành (Stage 8 - màu xanh lá)
+
+4. BẢNG LOG
+   - Hiển thị đầy đủ 8 cột thời gian
+   - Tìm kiếm theo số thùng
+   - Phân trang 5/10/20/50 dòng
+   - Format: HH:mm:ss cho các cột giờ
+
+5. DIALOG CHI TIẾT THÙNG
+   - Thông tin: Số thùng, Mẻ, Mác, Khối lượng, Từ, Đến
+   - Thành phần hóa học: C, Si, Mn, P, S, Ti (hiển thị 3 chữ số thập phân)
+   - Lịch sử công đoạn: Bảng hiển thị đầy đủ 8 công đoạn với timestamp
+
+6. FILES CHANGED
+   - src/services/ganttService.ts: 
+     * Interface ThungGangData đã có đầy đủ fields
+     * Thêm function getGangNhatTrinhLatest()
+   
+   - src/pages/SoDoVanHanh.tsx:
+     * Parse data thành 8 sections
+     * Cập nhật CarStatus type
+     * Cập nhật LogRow type
+     * StatusChip hiển thị màu theo state
+     * Dialog hiển thị đầy đủ thông tin
+     * Bảng log 15 cột
+
+7. POLLING
+   - Auto refresh mỗi 10 giây (VITE_BOF_POLL_MS)
+   - Hiển thị thời gian cập nhật cuối
+
 [2026-01-23] CẬP NHẬT CHÍNH - 7 CÔNG ĐOẠN + HRC + TPHH
 
 1. CÔNG ĐOẠN (TỪ 4 lên 7 công đoạn)
