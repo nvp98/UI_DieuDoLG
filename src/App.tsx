@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Gauge, Bell } from "lucide-react";
 import ThungGangAnalysis from "@/pages/ThungGangAnalysis";
 import SoDoVanHanh from "@/pages/SoDoVanHanh";
+import BaoCaoThongKe from "@/pages/BaoCaoThongKe";
 import NavigationMenu from "@/components/NavigationMenu";
 import PlaceholderPage from "@/components/PlaceholderPage";
 
@@ -39,7 +40,7 @@ export default function App() {
       case "analysis":
         return <ThungGangAnalysis />;
       case "baocao":
-        return <PlaceholderPage title="Báo cáo thống kê" />;
+        return <BaoCaoThongKe />;
       default:
         return <SoDoVanHanh />;
     }

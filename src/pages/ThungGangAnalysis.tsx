@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Line,
-  BarChart,
   Bar,
   XAxis,
   YAxis,
@@ -15,9 +14,6 @@ import {
   Cell,
   Area,
   ComposedChart,
-  ScatterChart,
-  Scatter,
-  ZAxis,
 } from "recharts";
 import { format, differenceInMinutes, parseISO } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
@@ -55,6 +51,7 @@ import {
   searchGangNhatTrinh,
   ThungGangData as GangData,
 } from "@/services/ganttService";
+import { da } from "date-fns/locale";
 
 // Use ThungGangData from ganttService
 type ThungGangData = GangData;
@@ -111,13 +108,17 @@ const ThungGangAnalysis: React.FC = () => {
     if (!data || data.length === 0) return [];
 
     // Sort data by GioBatDau first to ensure chronological order
-    const sortedData = data
-      .filter((item) => item.GioBatDau)
-      .sort((a, b) => {
-        const dateA = parseISO(a.GioBatDau!);
-        const dateB = parseISO(b.GioBatDau!);
-        return dateA.getTime() - dateB.getTime();
-      });
+    // Keep all records, even those without GioBatDau
+    const sortedData = [...data].sort((a, b) => {
+      // Items without GioBatDau go to the end
+      if (!a.GioBatDau && !b.GioBatDau) return 0;
+      if (!a.GioBatDau) return 1;
+      if (!b.GioBatDau) return -1;
+
+      const dateA = parseISO(a.GioBatDau);
+      const dateB = parseISO(b.GioBatDau);
+      return dateA.getTime() - dateB.getTime();
+    });
 
     // Group data by bucket number AND isNM (to distinguish DQ1 and DQ2)
     const bucketGroups = new Map<string, ThungGangData[]>();
@@ -185,8 +186,9 @@ const ThungGangAnalysis: React.FC = () => {
           caSX: current.CaSX,
           cycleTimeMinutes, // Time from previous pour (0 for first pour)
           pourTimeMinutes,
-          fullTime: current.GioBatDau!,
-          nextPourStart: i < items.length - 1 ? items[i + 1].GioBatDau! : "",
+          fullTime: current.GioBatDau || "", // Handle null GioBatDau
+          nextPourStart:
+            i < items.length - 1 ? items[i + 1].GioBatDau || "" : "",
           diemDau: current.DiemDau,
           diemDen: current.DiemDen,
           khoiLuong: current.KhoiLuong,
@@ -195,8 +197,12 @@ const ThungGangAnalysis: React.FC = () => {
       }
     });
 
-    // Sort by most recent first
+    // Sort by most recent first (handle empty fullTime)
     return cycleData.sort((a, b) => {
+      if (!a.fullTime && !b.fullTime) return 0;
+      if (!a.fullTime) return 1; // Put empty at end
+      if (!b.fullTime) return -1; // Put empty at end
+
       const dateA = parseISO(a.fullTime);
       const dateB = parseISO(b.fullTime);
       return dateB.getTime() - dateA.getTime();
@@ -209,31 +215,19 @@ const ThungGangAnalysis: React.FC = () => {
     return cycleTimeAnalysis[0];
   }, [cycleTimeAnalysis]);
 
-  // Average cycle time
+  // Average cycle time (exclude first pour with cycleTime = 0)
   const averageCycleTime = useMemo(() => {
     if (cycleTimeAnalysis.length === 0) return 0;
-    const total = cycleTimeAnalysis.reduce(
+    const validCycleTimes = cycleTimeAnalysis.filter(
+      (item) => item.cycleTimeMinutes > 0,
+    );
+    if (validCycleTimes.length === 0) return 0;
+    const total = validCycleTimes.reduce(
       (sum, item) => sum + item.cycleTimeMinutes,
       0,
     );
-    return Math.round(total / cycleTimeAnalysis.length);
+    return Math.round(total / validCycleTimes.length);
   }, [cycleTimeAnalysis]);
-
-  // Chart data for cycle time trend
-  const chartData = useMemo(() => {
-    return cycleTimeAnalysis
-      .slice()
-      .reverse()
-      .map((item, index) => ({
-        index: index + 1,
-        soThung: item.soThung,
-        isNM: item.isNM,
-        cycleTime: item.cycleTimeMinutes,
-        pourTime: item.pourTimeMinutes,
-        avgCycleTime: averageCycleTime,
-        time: format(parseISO(item.fullTime), "HH:mm dd/MM"),
-      }));
-  }, [cycleTimeAnalysis, averageCycleTime]);
 
   // Statistics
   const statistics = useMemo(() => {
@@ -247,13 +241,18 @@ const ThungGangAnalysis: React.FC = () => {
       };
     }
 
-    const cycleTimes = cycleTimeAnalysis.map((item) => item.cycleTimeMinutes);
+    // Filter out first pours (cycleTime = 0) for accurate min/max
+    const validCycleTimes = cycleTimeAnalysis
+      .map((item) => item.cycleTimeMinutes)
+      .filter((t) => t > 0);
     const pourTimes = cycleTimeAnalysis.map((item) => item.pourTimeMinutes);
 
     return {
       total: cycleTimeAnalysis.length,
-      minCycleTime: Math.min(...cycleTimes),
-      maxCycleTime: Math.max(...cycleTimes),
+      minCycleTime:
+        validCycleTimes.length > 0 ? Math.min(...validCycleTimes) : 0,
+      maxCycleTime:
+        validCycleTimes.length > 0 ? Math.max(...validCycleTimes) : 0,
       avgPourTime: Math.round(
         pourTimes.reduce((sum, val) => sum + val, 0) / pourTimes.length,
       ),
@@ -312,19 +311,212 @@ const ThungGangAnalysis: React.FC = () => {
     );
   }, [selectedBucket, cycleTimeAnalysis]);
 
-  // Distribution by shift
-  const shiftDistribution = useMemo(() => {
-    const shifts = { 1: 0, 2: 0 };
-    data.forEach((item) => {
-      if (item.CaSX in shifts) {
-        shifts[item.CaSX as keyof typeof shifts]++;
+  // Regional analysis by location/furnace
+  const bucketAnalysis = useMemo(() => {
+    console.log(data);
+    if (!data || data.length === 0) return [];
+
+    // Helper function to parse time to minutes from midnight
+    const parseTimeToMinutes = (timeStr: string | null): number | null => {
+      if (!timeStr) return null;
+      try {
+        const date = parseISO(timeStr);
+        return date.getHours() * 60 + date.getMinutes();
+      } catch {
+        return null;
       }
+    };
+
+    // Helper function to format minutes to HH:mm
+    const formatMinutesToTime = (minutes: number): string => {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+    };
+
+    // Helper function to calculate stats
+    const calculateStats = (values: number[]) => {
+      if (values.length === 0) return { avg: "", min: "", max: "" };
+      const avg = Math.round(
+        values.reduce((sum, v) => sum + v, 0) / values.length,
+      );
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      return { avg, min, max };
+    };
+
+    // Helper function to calculate time stats with formatting
+    const calculateTimeStats = (values: number[]) => {
+      if (values.length === 0) return { avg: "", min: "", max: "" };
+      const stats = calculateStats(values);
+      return {
+        avg: formatMinutesToTime(stats.avg as number),
+        min: formatMinutesToTime(stats.min as number),
+        max: formatMinutesToTime(stats.max as number),
+      };
+    };
+
+    // Helper function to calculate cycle time stats (in minutes)
+    const calculateCycleStats = (values: number[]) => {
+      if (values.length === 0) return { avg: "", min: "", max: "" };
+      const stats = calculateStats(values);
+      return {
+        avg: `${stats.avg} phút`,
+        min: `${stats.min} phút`,
+        max: `${stats.max} phút`,
+      };
+    };
+
+    // Group data by bucket number AND area (to show each bucket-area combination)
+    const bucketAreaGroups = new Map<string, ThungGangData[]>();
+    data.forEach((item) => {
+      const bucketNumber = item.SoThung;
+      const areaKey = `${bucketNumber}-${item.isNM}`; // Composite key: bucket-area
+      if (!bucketAreaGroups.has(areaKey)) {
+        bucketAreaGroups.set(areaKey, []);
+      }
+      bucketAreaGroups.get(areaKey)!.push(item);
     });
-    return [
-      { shift: "Ca 1", count: shifts[1] },
-      { shift: "Ca 2", count: shifts[2] },
-    ];
-  }, [data]);
+
+    // Get unique bucket-area combinations and sort them
+    const uniqueBucketAreas = Array.from(bucketAreaGroups.keys()).sort(
+      (a, b) => {
+        const [numA, areaA] = a.split("-");
+        const [numB, areaB] = b.split("-");
+        const bucketCompare = (parseInt(numA) || 0) - (parseInt(numB) || 0);
+        if (bucketCompare !== 0) return bucketCompare;
+        return (parseInt(areaA) || 0) - (parseInt(areaB) || 0);
+      },
+    );
+
+    return uniqueBucketAreas.map((bucketAreaKey) => {
+      const [bucketNumber, areaValue] = bucketAreaKey.split("-");
+      const bucketData = bucketAreaGroups.get(bucketAreaKey) || [];
+
+      const isNM = parseInt(areaValue);
+      const area = isNM === 1 ? "DQ1" : isNM === 2 ? "DQ2" : `DQ${isNM}`;
+
+      // Sort bucket data chronologically by GioBatDau
+      const sortedBucketData = [...bucketData].sort((a, b) => {
+        if (!a.GioBatDau || !b.GioBatDau) return 0;
+        return (
+          parseISO(a.GioBatDau).getTime() - parseISO(b.GioBatDau).getTime()
+        );
+      });
+
+      // Calculate pour finish time deltas (delta = lần rót xong thứ 2 - lần rót xong gần nhất trước đó)
+      const pourFinishDeltas: number[] = [];
+      for (let i = 1; i < sortedBucketData.length; i++) {
+        const prevTime = sortedBucketData[i - 1].G_RotDayThung;
+        const currTime = sortedBucketData[i].G_RotDayThung;
+        if (prevTime && currTime) {
+          const delta = differenceInMinutes(
+            parseISO(currTime),
+            parseISO(prevTime),
+          );
+          if (delta > 0) pourFinishDeltas.push(delta);
+        }
+      }
+      const pourFinishStats = calculateCycleStats(pourFinishDeltas);
+
+      // Calculate enter LT time deltas (delta = lần vào LT thứ 2 - lần vào LT gần nhất trước đó)
+      const enterLTDeltas: number[] = [];
+      for (let i = 1; i < sortedBucketData.length; i++) {
+        const prevTime = sortedBucketData[i - 1].GioVaoLT;
+        const currTime = sortedBucketData[i].GioVaoLT;
+        if (prevTime && currTime) {
+          const delta = differenceInMinutes(
+            parseISO(currTime),
+            parseISO(prevTime),
+          );
+          if (delta > 0) enterLTDeltas.push(delta);
+        }
+      }
+      const enterLTStats = calculateCycleStats(enterLTDeltas);
+
+      // Calculate cycle time deltas (delta = lần bắt đầu rót thứ 2 - lần bắt đầu rót gần nhất trước đó)
+      const cycleTimeDeltas: number[] = [];
+      for (let i = 1; i < sortedBucketData.length; i++) {
+        const prevTime = sortedBucketData[i - 1].GioBatDau;
+        const currTime = sortedBucketData[i].GioBatDau;
+        if (prevTime && currTime) {
+          const delta = differenceInMinutes(
+            parseISO(currTime),
+            parseISO(prevTime),
+          );
+          if (delta > 0) cycleTimeDeltas.push(delta);
+        }
+      }
+      const cycleTimeStats = calculateCycleStats(cycleTimeDeltas);
+
+      // Count actual valid cycles (use cycleTimeDeltas length for consistency)
+      // This ensures "Số lần quay vòng" matches the number of values used in TB calculation
+      const cycleCount = cycleTimeDeltas.length;
+
+      return {
+        bucketNumber: `Thùng ${bucketNumber.padStart(2, "0")}`,
+        rawBucketNumber: bucketNumber,
+        area,
+        cycleCount,
+        pourFinish: pourFinishStats,
+        enterLT: enterLTStats,
+        cycleTime: cycleTimeStats,
+      };
+    });
+  }, [data, cycleTimeAnalysis]);
+
+  // Chart data for bucket analysis overview - show average cycle time per bucket
+  const bucketChartData = useMemo(() => {
+    return bucketAnalysis.map((bucket) => {
+      // Extract avg value from cycleTime string (format: "XX phút" or "")
+      const avgString = bucket.cycleTime.avg as string;
+      const avgValue =
+        avgString && avgString !== ""
+          ? parseInt(avgString.replace(" phút", ""))
+          : 0;
+
+      return {
+        bucketLabel: `${bucket.rawBucketNumber}-${bucket.area}`, // Short format: "01-DQ1"
+        bucketNumber: bucket.bucketNumber, // Full format: "Thùng 01"
+        area: bucket.area,
+        avgCycleTime: avgValue,
+        cycleCount: bucket.cycleCount,
+        overallAvg: averageCycleTime, // Overall average for reference line
+      };
+    });
+  }, [bucketAnalysis, averageCycleTime]);
+
+  // Filter bucket analysis based on filters
+  const filteredBucketAnalysis = useMemo(() => {
+    let filtered = [...bucketAnalysis];
+
+    // Filter by bucket number
+    if (bucketFilter) {
+      filtered = filtered.filter((item) =>
+        item.rawBucketNumber.includes(bucketFilter),
+      );
+    }
+
+    // Filter by area (DQ1 or DQ2)
+    if (areaFilter !== "all") {
+      const filterIsNM = parseInt(areaFilter);
+      const targetArea =
+        filterIsNM === 1 ? "DQ1" : filterIsNM === 2 ? "DQ2" : `DQ${filterIsNM}`;
+      filtered = filtered.filter((item) => item.area === targetArea);
+    }
+
+    return filtered;
+  }, [bucketAnalysis, bucketFilter, areaFilter]);
+
+  // Paginate filtered data
+  const paginatedBucketAnalysis = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredBucketAnalysis.slice(startIndex, endIndex);
+  }, [filteredBucketAnalysis, currentPage, pageSize]);
+
+  // Calculate total pages for bucket analysis
+  const totalBucketPages = Math.ceil(filteredBucketAnalysis.length / pageSize);
 
   return (
     <div className="p-6 space-y-6 bg-white min-h-screen">
@@ -388,7 +580,7 @@ const ThungGangAnalysis: React.FC = () => {
         <Card className="bg-white shadow-sm border-gray-200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-700">
-              Tổng số lượt
+              Tổng lượt rót
             </CardTitle>
             <Activity className="h-4 w-4 text-gray-400" />
           </CardHeader>
@@ -507,7 +699,9 @@ const ThungGangAnalysis: React.FC = () => {
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
                   Rót đầy:{" "}
-                  {format(parseISO(recentCycleTime.fullTime), "HH:mm dd/MM")}
+                  {recentCycleTime.fullTime
+                    ? format(parseISO(recentCycleTime.fullTime), "HH:mm dd/MM")
+                    : "N/A"}
                 </p>
               </div>
             </div>
@@ -522,19 +716,20 @@ const ThungGangAnalysis: React.FC = () => {
             Biểu đồ theo dõi thời gian quay vòng thùng tổng quan
           </CardTitle>
           <p className="text-sm text-gray-600">
-            Xu hướng thời gian quay vòng theo thời gian
+            Thời gian quay vòng trung bình theo số thùng và khu vực
           </p>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
-            <ComposedChart data={chartData}>
+            <ComposedChart data={bucketChartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
-                dataKey="time"
+                dataKey="bucketLabel"
                 angle={-45}
                 textAnchor="end"
-                height={80}
-                tick={{ fontSize: 12 }}
+                height={100}
+                tick={{ fontSize: 11 }}
+                interval={0}
               />
               <YAxis
                 label={{
@@ -547,25 +742,19 @@ const ThungGangAnalysis: React.FC = () => {
                 content={({ active, payload }) => {
                   if (active && payload && payload.length) {
                     const data = payload[0].payload;
-                    const area =
-                      data.isNM === 1
-                        ? "DQ1"
-                        : data.isNM === 2
-                          ? "DQ2"
-                          : `DQ${data.isNM}`;
                     return (
                       <div className="bg-white p-4 border rounded-lg shadow-lg">
-                        <p className="font-semibold mb-2 text-gray-600">
-                          Thùng số {data.soThung} ({area})
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          Thời gian: {data.time}
+                        <p className="font-semibold mb-2 text-gray-900">
+                          {data.bucketNumber} ({data.area})
                         </p>
                         <p className="text-sm text-blue-600 font-medium">
-                          TG quay vòng: {data.cycleTime} phút
-                        </p>
-                        <p className="text-sm text-indigo-600">
                           TB quay vòng: {data.avgCycleTime} phút
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          Số lần quay vòng: {data.cycleCount}
+                        </p>
+                        <p className="text-sm text-orange-600">
+                          TB tổng quát: {data.overallAvg} phút
                         </p>
                       </div>
                     );
@@ -576,19 +765,37 @@ const ThungGangAnalysis: React.FC = () => {
               <Legend />
               <Line
                 type="monotone"
-                dataKey="cycleTime"
-                stroke="#0ea5e9"
+                dataKey="avgCycleTime"
+                stroke="#3b82f6"
                 strokeWidth={3}
-                name="TG quay vòng (phút)"
-                dot={{ r: 5, fill: "#0ea5e9", strokeWidth: 2, stroke: "#fff" }}
+                name="TB quay vòng (phút)"
+                dot={(props: any) => {
+                  const { cx, cy, payload } = props;
+                  const color =
+                    payload.avgCycleTime < averageCycleTime * 0.8
+                      ? "#22c55e"
+                      : payload.avgCycleTime > averageCycleTime * 1.2
+                        ? "#ef4444"
+                        : "#3b82f6";
+                  return (
+                    <circle
+                      cx={cx}
+                      cy={cy}
+                      r={6}
+                      fill={color}
+                      stroke="#fff"
+                      strokeWidth={2}
+                    />
+                  );
+                }}
               />
               <Line
                 type="monotone"
-                dataKey="avgCycleTime"
+                dataKey="overallAvg"
                 stroke="#f97316"
-                strokeWidth={3}
+                strokeWidth={2}
                 strokeDasharray="5 5"
-                name="TB quay vòng"
+                name="TB tổng quát"
                 dot={false}
               />
             </ComposedChart>
@@ -596,149 +803,278 @@ const ThungGangAnalysis: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Distribution by Shift */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-white shadow-sm border-gray-200">
-          <CardHeader>
-            <CardTitle className="text-gray-900">
-              Phân bố theo ca sản xuất
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={shiftDistribution}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="shift" />
-                <YAxis />
-                <RechartsTooltip />
-                <Bar dataKey="count" fill="#8b5cf6" name="Số lượt" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+      {/* Bucket Analysis Table */}
+      <Card className="bg-white shadow-sm border-gray-200">
+        <CardHeader>
+          <CardTitle className="text-gray-900">
+            Phân tích theo số thùng gang
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-1">
+            Thống kê thời gian quay vòng theo từng số thùng trong khoảng thời
+            gian đã chọn
+          </p>
+        </CardHeader>
+        <CardContent>
+          {/* Filters */}
+          <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-700 font-medium">
+                Số thùng:
+              </span>
+              <input
+                type="text"
+                value={bucketFilter}
+                onChange={(e) => {
+                  setBucketFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="Nhập số thùng"
+                className="px-3 py-2 border-2 border-gray-400 bg-white rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 w-40"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-700 font-medium">
+                Khu vực:
+              </span>
+              <select
+                value={areaFilter}
+                onChange={(e) => {
+                  setAreaFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="px-3 py-2 border-2 border-gray-400 bg-white rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Tất cả</option>
+                <option value="1">DQ1</option>
+                <option value="2">DQ2</option>
+              </select>
+            </div>
+            <div className="text-sm text-gray-600 ml-auto">
+              Kết quả lọc:{" "}
+              <span className="font-semibold text-gray-900">
+                {filteredBucketAnalysis.length}
+              </span>{" "}
+              thùng
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-100 border-b border-gray-200">
+                  <TableHead
+                    rowSpan={2}
+                    className="text-gray-700 font-semibold border-r text-center align-middle"
+                  >
+                    Số thùng
+                  </TableHead>
+                  <TableHead
+                    rowSpan={2}
+                    className="text-gray-700 font-semibold border-r text-center align-middle"
+                  >
+                    Khu vực
+                  </TableHead>
+                  <TableHead
+                    rowSpan={2}
+                    className="text-gray-700 font-semibold border-r text-center align-middle"
+                  >
+                    Số lần quay vòng
+                  </TableHead>
+                  <TableHead
+                    colSpan={3}
+                    className="text-gray-700 font-semibold border-r text-center"
+                  >
+                    Rót xong
+                  </TableHead>
+                  <TableHead
+                    colSpan={3}
+                    className="text-gray-700 font-semibold border-r text-center"
+                  >
+                    Vào LT
+                  </TableHead>
+                  <TableHead
+                    colSpan={3}
+                    className="text-gray-700 font-semibold text-center"
+                  >
+                    TG quay vòng
+                  </TableHead>
+                </TableRow>
+                <TableRow className="bg-gray-50 border-b border-gray-200">
+                  <TableHead className="text-gray-600 text-center border-r">
+                    TB
+                  </TableHead>
+                  <TableHead className="text-gray-600 text-center border-r">
+                    Min
+                  </TableHead>
+                  <TableHead className="text-gray-600 text-center border-r">
+                    Max
+                  </TableHead>
+                  <TableHead className="text-gray-600 text-center border-r">
+                    TB
+                  </TableHead>
+                  <TableHead className="text-gray-600 text-center border-r">
+                    Min
+                  </TableHead>
+                  <TableHead className="text-gray-600 text-center border-r">
+                    Max
+                  </TableHead>
+                  <TableHead className="text-gray-600 text-center border-r">
+                    TB
+                  </TableHead>
+                  <TableHead className="text-gray-600 text-center border-r">
+                    Min
+                  </TableHead>
+                  <TableHead className="text-gray-600 text-center">
+                    Max
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paginatedBucketAnalysis.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={11}
+                      className="text-center py-8 text-gray-500"
+                    >
+                      Không có dữ liệu phù hợp với bộ lọc
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  paginatedBucketAnalysis.map((bucket, index) => (
+                    <TableRow
+                      key={`${bucket.bucketNumber}-${bucket.area}`}
+                      className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                    >
+                      <TableCell className="font-semibold text-gray-900 border-r">
+                        {bucket.bucketNumber}
+                      </TableCell>
+                      <TableCell className="text-center border-r">
+                        <span
+                          className={`px-2 py-1 rounded text-xs font-semibold ${
+                            bucket.area === "DQ1"
+                              ? "bg-blue-100 text-blue-700"
+                              : bucket.area === "DQ2"
+                                ? "bg-purple-100 text-purple-700"
+                                : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {bucket.area}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center text-blue-600 font-bold border-r">
+                        {bucket.cycleCount || "-"}
+                      </TableCell>
+                      {/* Rót xong */}
+                      <TableCell className="text-center text-gray-900 border-r">
+                        {bucket.pourFinish.avg || "-"}
+                      </TableCell>
+                      <TableCell className="text-center text-green-600 border-r">
+                        {bucket.pourFinish.min || "-"}
+                      </TableCell>
+                      <TableCell className="text-center text-red-600 border-r">
+                        {bucket.pourFinish.max || "-"}
+                      </TableCell>
+                      {/* Vào LT */}
+                      <TableCell className="text-center text-gray-900 border-r">
+                        {bucket.enterLT.avg || "-"}
+                      </TableCell>
+                      <TableCell className="text-center text-green-600 border-r">
+                        {bucket.enterLT.min || "-"}
+                      </TableCell>
+                      <TableCell className="text-center text-red-600 border-r">
+                        {bucket.enterLT.max || "-"}
+                      </TableCell>
+                      {/* TG quay vòng */}
+                      <TableCell className="text-center text-gray-900 font-medium border-r">
+                        {bucket.cycleTime.avg || "-"}
+                      </TableCell>
+                      <TableCell className="text-center text-green-600 border-r">
+                        {bucket.cycleTime.min || "-"}
+                      </TableCell>
+                      <TableCell className="text-center text-red-600">
+                        {bucket.cycleTime.max || "-"}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
-        {/* Cycle Time Distribution */}
-        <Card className="bg-white shadow-sm border-gray-200">
-          <CardHeader>
-            <CardTitle className="text-gray-900">
-              Phân loại thời gian quay vòng
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 bg-green-500 rounded"></div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      Nhanh (&lt; 80% TB)
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      &lt; {Math.round(averageCycleTime * 0.8)} phút
-                    </p>
-                  </div>
-                </div>
-                <p className="text-2xl font-bold text-green-600">
-                  {
-                    cycleTimeAnalysis.filter(
-                      (item) => item.cycleTimeMinutes < averageCycleTime * 0.8,
-                    ).length
-                  }
-                </p>
+          {/* Pagination Controls for Bucket Analysis */}
+          {filteredBucketAnalysis.length > 0 && (
+            <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+              <div className="text-sm text-gray-600">
+                Hiển thị {(currentPage - 1) * pageSize + 1} -{" "}
+                {Math.min(
+                  currentPage * pageSize,
+                  filteredBucketAnalysis.length,
+                )}{" "}
+                trong tổng số {filteredBucketAnalysis.length} kết quả
               </div>
-
-              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      Bình thường (80-120% TB)
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {Math.round(averageCycleTime * 0.8)} -{" "}
-                      {Math.round(averageCycleTime * 1.2)} phút
-                    </p>
-                  </div>
-                </div>
-                <p className="text-2xl font-bold text-blue-600">
-                  {
-                    cycleTimeAnalysis.filter(
-                      (item) =>
-                        item.cycleTimeMinutes >= averageCycleTime * 0.8 &&
-                        item.cycleTimeMinutes <= averageCycleTime * 1.2,
-                    ).length
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
                   }
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
-                <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 bg-red-500 rounded"></div>
-                  <div>
-                    <p className="font-medium text-gray-900">
-                      Chậm (&gt; 120% TB)
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      &gt; {Math.round(averageCycleTime * 1.2)} phút
-                    </p>
-                  </div>
+                  disabled={currentPage === 1}
+                >
+                  Trước
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: totalBucketPages }, (_, i) => i + 1)
+                    .filter((page) => {
+                      // Show first page, last page, current page, and pages around current
+                      return (
+                        page === 1 ||
+                        page === totalBucketPages ||
+                        Math.abs(page - currentPage) <= 1
+                      );
+                    })
+                    .map((page, index, array) => (
+                      <React.Fragment key={page}>
+                        {index > 0 && array[index - 1] !== page - 1 && (
+                          <span className="px-2 text-gray-400">...</span>
+                        )}
+                        <Button
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          className="min-w-[2.5rem]"
+                        >
+                          {page}
+                        </Button>
+                      </React.Fragment>
+                    ))}
                 </div>
-                <p className="text-2xl font-bold text-red-600">
-                  {
-                    cycleTimeAnalysis.filter(
-                      (item) => item.cycleTimeMinutes > averageCycleTime * 1.2,
-                    ).length
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) =>
+                      Math.min(totalBucketPages, prev + 1),
+                    )
                   }
-                </p>
+                  disabled={currentPage === totalBucketPages}
+                >
+                  Sau
+                </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Detailed Table */}
       <Card className="bg-white shadow-sm border-gray-200">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-gray-900">
-                Chi tiết thời gian quay vòng gần nhất
-              </CardTitle>
-              <p className="text-sm text-gray-600">
-                Danh sách chi tiết các lượt quay vòng thùng gang gần nhất
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Số thùng:</span>
-                <input
-                  type="text"
-                  value={bucketFilter}
-                  onChange={(e) => {
-                    setBucketFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  placeholder="Nhập số thùng"
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 w-32"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Khu vực:</span>
-                <select
-                  value={areaFilter}
-                  onChange={(e) => {
-                    setAreaFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="all">Tất cả</option>
-                  <option value="1">DQ1</option>
-                  <option value="2">DQ2</option>
-                </select>
-              </div>
-            </div>
-          </div>
+          <CardTitle className="text-gray-900">
+            Chi tiết thời gian quay vòng gần nhất
+          </CardTitle>
+          <p className="text-sm text-gray-600 mt-1">
+            Danh sách chi tiết các lượt quay vòng thùng gang gần nhất
+          </p>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
@@ -807,7 +1143,9 @@ const ThungGangAnalysis: React.FC = () => {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-gray-900">
-                        {format(parseISO(item.fullTime), "HH:mm dd/MM/yyyy")}
+                        {item.fullTime
+                          ? format(parseISO(item.fullTime), "HH:mm dd/MM/yyyy")
+                          : "N/A"}
                       </TableCell>
                       {/* <TableCell className="text-sm text-gray-900">
                         {format(
@@ -953,9 +1291,17 @@ const ThungGangAnalysis: React.FC = () => {
                 <div className="grid grid-cols-3 gap-4 mb-6">
                   <Card className="bg-blue-50">
                     <CardContent className="pt-4">
-                      <p className="text-sm text-gray-600">Tổng số lượt</p>
+                      <p className="text-sm text-gray-600">Số lần quay vòng</p>
                       <p className="text-2xl font-bold text-blue-600">
-                        {bucketDetailHistory.length}
+                        {(() => {
+                          const validCycles = bucketDetailHistory.filter(
+                            (item) => item.cycleTimeMinutes > 0,
+                          );
+                          return validCycles.length;
+                        })()}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        (Tổng {bucketDetailHistory.length} lượt rót)
                       </p>
                     </CardContent>
                   </Card>
@@ -963,12 +1309,18 @@ const ThungGangAnalysis: React.FC = () => {
                     <CardContent className="pt-4">
                       <p className="text-sm text-gray-600">TB quay vòng</p>
                       <p className="text-2xl font-bold text-green-600">
-                        {Math.round(
-                          bucketDetailHistory.reduce(
-                            (sum, item) => sum + item.cycleTimeMinutes,
-                            0,
-                          ) / bucketDetailHistory.length,
-                        )}{" "}
+                        {(() => {
+                          const validCycles = bucketDetailHistory.filter(
+                            (item) => item.cycleTimeMinutes > 0,
+                          );
+                          if (validCycles.length === 0) return "0";
+                          return Math.round(
+                            validCycles.reduce(
+                              (sum, item) => sum + item.cycleTimeMinutes,
+                              0,
+                            ) / validCycles.length,
+                          );
+                        })()}{" "}
                         phút
                       </p>
                     </CardContent>
@@ -999,28 +1351,38 @@ const ThungGangAnalysis: React.FC = () => {
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                       <ComposedChart
-                        data={bucketDetailHistory
-                          .slice()
-                          .sort(
-                            (a, b) =>
-                              parseISO(a.fullTime).getTime() -
-                              parseISO(b.fullTime).getTime(),
-                          )
-                          .map((item, index) => ({
-                            index: index + 1,
-                            cycleTime: item.cycleTimeMinutes,
-                            pourTime: item.pourTimeMinutes,
-                            time: format(
-                              parseISO(item.fullTime),
-                              "HH:mm dd/MM",
-                            ),
-                            avgCycleTime: Math.round(
-                              bucketDetailHistory.reduce(
-                                (sum, i) => sum + i.cycleTimeMinutes,
-                                0,
-                              ) / bucketDetailHistory.length,
-                            ),
-                          }))}
+                        data={(() => {
+                          const validCycles = bucketDetailHistory.filter(
+                            (item) => item.cycleTimeMinutes > 0,
+                          );
+                          const avgCycle =
+                            validCycles.length > 0
+                              ? Math.round(
+                                  validCycles.reduce(
+                                    (sum, i) => sum + i.cycleTimeMinutes,
+                                    0,
+                                  ) / validCycles.length,
+                                )
+                              : 0;
+                          return bucketDetailHistory
+                            .filter((item) => item.fullTime) // Only show items with valid time
+                            .slice()
+                            .sort(
+                              (a, b) =>
+                                parseISO(a.fullTime).getTime() -
+                                parseISO(b.fullTime).getTime(),
+                            )
+                            .map((item, index) => ({
+                              index: index + 1,
+                              cycleTime: item.cycleTimeMinutes,
+                              pourTime: item.pourTimeMinutes,
+                              time: format(
+                                parseISO(item.fullTime),
+                                "HH:mm dd/MM",
+                              ),
+                              avgCycleTime: avgCycle,
+                            }));
+                        })()}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis
@@ -1136,10 +1498,12 @@ const ThungGangAnalysis: React.FC = () => {
                             {index + 1}
                           </TableCell>
                           <TableCell className="text-sm text-gray-900">
-                            {format(
-                              parseISO(item.fullTime),
-                              "HH:mm dd/MM/yyyy",
-                            )}
+                            {item.fullTime
+                              ? format(
+                                  parseISO(item.fullTime),
+                                  "HH:mm dd/MM/yyyy",
+                                )
+                              : "N/A"}
                           </TableCell>
                           <TableCell>
                             <Badge

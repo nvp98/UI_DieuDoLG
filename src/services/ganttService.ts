@@ -230,6 +230,7 @@ export interface GangNhatTrinhSearchParams {
   toDate?: string; // Format: YYYY-MM-DD
   idLoCao?: number;
   soThung?: string;
+  isNM?: number; // 0 for DQ1, 1 for DQ2
 }
 
 export const searchGangNhatTrinh = async (params: GangNhatTrinhSearchParams): Promise<ThungGangData[]> => {
@@ -247,6 +248,9 @@ export const searchGangNhatTrinh = async (params: GangNhatTrinhSearchParams): Pr
     }
     if (params.soThung) {
       queryParams.append("soThung", params.soThung);
+    }
+    if (params.isNM !== undefined) {
+      queryParams.append("isNM", params.isNM.toString());
     }
 
     const url = `https://chart.hoaphatdungquat.vn/api/gang-nhat-trinh/search${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
