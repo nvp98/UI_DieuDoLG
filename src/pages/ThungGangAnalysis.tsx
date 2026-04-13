@@ -51,7 +51,7 @@ import {
   searchGangNhatTrinh,
   ThungGangData as GangData,
 } from "@/services/ganttService";
-import { da } from "date-fns/locale";
+import { da, it } from "date-fns/locale";
 
 // Use ThungGangData from ganttService
 type ThungGangData = GangData;
@@ -100,7 +100,18 @@ const ThungGangAnalysis: React.FC = () => {
         fromDate,
         toDate,
       });
-      setData(result);
+      // lọc bỏ các TH đã hoàn thành mà k có giờ kết raLT (GioRaLT),
+      //  không có mẻ của isNM =1 để đảm bảo tính chính xác của phân tích
+
+      const filteredData = result.filter(
+        (item) =>
+          (item.GioRaLT &&
+            item.isNM === 1 &&
+            item.TinhTrang === 1 &&
+            item.Me != null) ||
+          item.isNM === 2, //
+      );
+      setData(filteredData);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -382,6 +393,16 @@ const ThungGangAnalysis: React.FC = () => {
       bucketAreaGroups.get(areaKey)!.push(item);
     });
 
+    // Also group data by bucket number only (for cycle time calculation)
+    const bucketOnlyGroups = new Map<string, ThungGangData[]>();
+    data.forEach((item) => {
+      const bucketNumber = item.SoThung;
+      if (!bucketOnlyGroups.has(bucketNumber)) {
+        bucketOnlyGroups.set(bucketNumber, []);
+      }
+      bucketOnlyGroups.get(bucketNumber)!.push(item);
+    });
+
     // Get unique bucket-area combinations and sort them
     const uniqueBucketAreas = Array.from(bucketAreaGroups.keys()).sort(
       (a, b) => {
@@ -396,6 +417,8 @@ const ThungGangAnalysis: React.FC = () => {
     return uniqueBucketAreas.map((bucketAreaKey) => {
       const [bucketNumber, areaValue] = bucketAreaKey.split("-");
       const bucketData = bucketAreaGroups.get(bucketAreaKey) || [];
+      // For cycle time calculation, use all data for this bucket (aggregated across areas)
+      const bucketDataAllAreas = bucketOnlyGroups.get(bucketNumber) || [];
 
       const isNM = parseInt(areaValue);
       const area = isNM === 1 ? "DQ1" : isNM === 2 ? "DQ2" : `DQ${isNM}`;
@@ -408,7 +431,16 @@ const ThungGangAnalysis: React.FC = () => {
         );
       });
 
-      // Calculate pour finish time deltas (delta = lần rót xong thứ 2 - lần rót xong gần nhất trước đó)
+      // For cycle time, use all data for this bucket across all areas
+      const sortedBucketDataAllAreas = [...bucketDataAllAreas].sort((a, b) => {
+        if (!a.GioBatDau || !b.GioBatDau) return 0;
+        return (
+          parseISO(a.GioBatDau).getTime() - parseISO(b.GioBatDau).getTime()
+        );
+      });
+
+      // Calculate pour finish time deltas from CURRENT AREA data
+      // (delta = lần rót xong thứ 2 - lần rót xong gần nhất trước đó)
       const pourFinishDeltas: number[] = [];
       for (let i = 1; i < sortedBucketData.length; i++) {
         const prevTime = sortedBucketData[i - 1].G_RotDayThung;
@@ -423,7 +455,8 @@ const ThungGangAnalysis: React.FC = () => {
       }
       const pourFinishStats = calculateCycleStats(pourFinishDeltas);
 
-      // Calculate enter LT time deltas (delta = lần vào LT thứ 2 - lần vào LT gần nhất trước đó)
+      // Calculate enter LT time deltas from CURRENT AREA data
+      // (delta = lần vào LT thứ 2 - lần vào LT gần nhất trước đó)
       const enterLTDeltas: number[] = [];
       for (let i = 1; i < sortedBucketData.length; i++) {
         const prevTime = sortedBucketData[i - 1].GioVaoLT;
@@ -438,7 +471,9 @@ const ThungGangAnalysis: React.FC = () => {
       }
       const enterLTStats = calculateCycleStats(enterLTDeltas);
 
-      // Calculate cycle time deltas (delta = lần bắt đầu rót thứ 2 - lần bắt đầu rót gần nhất trước đó)
+      // Calculate cycle time deltas from CURRENT AREA data ONLY
+      // (delta = lần bắt đầu rót thứ 2 - lần bắt đầu rót gần nhất trước đó)
+      // Ví dụ: 07-DQ2 tính từ 07-DQ2 data only, không gom 07-DQ1 vào
       const cycleTimeDeltas: number[] = [];
       for (let i = 1; i < sortedBucketData.length; i++) {
         const prevTime = sortedBucketData[i - 1].GioBatDau;
@@ -453,8 +488,7 @@ const ThungGangAnalysis: React.FC = () => {
       }
       const cycleTimeStats = calculateCycleStats(cycleTimeDeltas);
 
-      // Count actual valid cycles (use cycleTimeDeltas length for consistency)
-      // This ensures "Số lần quay vòng" matches the number of values used in TB calculation
+      // Count actual valid cycles
       const cycleCount = cycleTimeDeltas.length;
 
       return {

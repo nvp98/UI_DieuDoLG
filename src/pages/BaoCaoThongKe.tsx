@@ -52,6 +52,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ThungGangData, searchGangNhatTrinh } from "@/services/ganttService";
+import * as XLSX from "xlsx";
 
 type ReportType = "overview" | "thunggang" | "vitri";
 
@@ -407,8 +408,125 @@ export const BaoCaoThongKe: React.FC = () => {
   }, [thungGangData]);
 
   const handleExportReport = () => {
-    // Implement export functionality
-    console.log("Exporting report...");
+    if (!thungGangData || thungGangData.length === 0) {
+      window.alert("Không có dữ liệu để xuất báo cáo.");
+      return;
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const fromLabel = dateRange?.from
+      ? format(dateRange.from, "yyyyMMdd")
+      : "from";
+    const toLabel = dateRange?.to ? format(dateRange.to, "yyyyMMdd") : "to";
+
+    if (reportType === "overview") {
+      const summarySheet = XLSX.utils.json_to_sheet([
+        {
+          "Tổng số thùng": summaryStats.totalBuckets,
+          "Lò cao hoạt động": summaryStats.activeFurnaces,
+          "Tổng sản lượng (tấn)": summaryStats.totalProduction,
+          "TG vận chuyển TB": summaryStats.avgTransportTime,
+        },
+      ]);
+
+      const furnaceSheet = XLSX.utils.json_to_sheet(
+        furnaceAnalysis.map((item) => ({
+          "Lò cao": item.name,
+          "Số lượng": item.soLuong,
+          "Sản lượng (tấn)": item.sanLuong,
+        })),
+      );
+
+      const areaSheet = XLSX.utils.json_to_sheet(
+        areaAnalysis.map((item) => ({
+          "Khu vực": item.name,
+          "Số lượt": item.value,
+        })),
+      );
+
+      const transportSheet = XLSX.utils.json_to_sheet(
+        transportTimeAnalysis.map((item) => ({
+          "Khoảng thời gian": item.name,
+          "Số lượng": item.value,
+        })),
+      );
+
+      XLSX.utils.book_append_sheet(workbook, summarySheet, "TongQuan");
+      XLSX.utils.book_append_sheet(workbook, furnaceSheet, "TheoLoCao");
+      XLSX.utils.book_append_sheet(workbook, areaSheet, "TheoKhuVuc");
+      XLSX.utils.book_append_sheet(workbook, transportSheet, "TGVanChuyen");
+
+      XLSX.writeFile(
+        workbook,
+        `bao-cao-tong-quan_${fromLabel}_${toLabel}.xlsx`,
+      );
+      return;
+    }
+
+    if (reportType === "thunggang") {
+      const reportData = thungGangData.map(convertThungGangDataToReport);
+      const exportRows = reportData.map((row, index) => ({
+        STT: index + 1,
+        "Ngày LG": row.ngayLo,
+        ID: row.id,
+        "Số thùng": row.soThung,
+        "VT1 - Vị trí": row.viTri1.vitri,
+        "VT1 - Công đoạn": row.viTri1.congDoan,
+        "VT1 - Thời gian": row.viTri1.time,
+        "VT1 - Delta": row.viTri1.delta,
+        "VT2 - Vị trí": row.viTri2.vitri,
+        "VT2 - Công đoạn": row.viTri2.congDoan,
+        "VT2 - Thời gian": row.viTri2.time,
+        "VT2 - Delta": row.viTri2.delta,
+        "VT3 - Vị trí": row.viTri3.vitri,
+        "VT3 - Công đoạn": row.viTri3.congDoan,
+        "VT3 - Thời gian": row.viTri3.time,
+        "VT3 - Delta": row.viTri3.delta,
+        "VT4 - Vị trí": row.viTri4.vitri,
+        "VT4 - Công đoạn": row.viTri4.congDoan,
+        "VT4 - Thời gian": row.viTri4.time,
+        "VT4 - Delta": row.viTri4.delta,
+        "VT5 - Vị trí": row.viTri5.vitri,
+        "VT5 - Công đoạn": row.viTri5.congDoan,
+        "VT5 - Thời gian": row.viTri5.time,
+        "VT5 - Delta": row.viTri5.delta,
+        "VT6 - Vị trí": row.viTri6.vitri,
+        "VT6 - Công đoạn": row.viTri6.congDoan,
+        "VT6 - Thời gian": row.viTri6.time,
+        "VT6 - Delta": row.viTri6.delta,
+        "VT7 - Vị trí": row.viTri7.vitri,
+        "VT7 - Công đoạn": row.viTri7.congDoan,
+        "VT7 - Thời gian": row.viTri7.time,
+        "VT7 - Delta": row.viTri7.delta,
+        "VT8 - Vị trí": row.viTri8.vitri,
+        "VT8 - Công đoạn": row.viTri8.congDoan,
+        "VT8 - Thời gian": row.viTri8.time,
+        "VT8 - Delta": row.viTri8.delta,
+        "VT9 - Vị trí": row.viTri9.vitri,
+        "VT9 - Công đoạn": row.viTri9.congDoan,
+        "VT9 - Thời gian": row.viTri9.time,
+        "VT9 - Delta": row.viTri9.delta,
+        "VT10 - Vị trí": row.viTri10.vitri,
+        "VT10 - Công đoạn": row.viTri10.congDoan,
+        "VT10 - Thời gian": row.viTri10.time,
+        "VT10 - Delta": row.viTri10.delta,
+        "VT11 - Vị trí": row.viTri11.vitri,
+        "VT11 - Công đoạn": row.viTri11.congDoan,
+        "VT11 - Thời gian": row.viTri11.time,
+        "VT11 - Delta": row.viTri11.delta,
+        "Tổng thời gian": row.tongThoiGian,
+      }));
+
+      const sheet = XLSX.utils.json_to_sheet(exportRows);
+      XLSX.utils.book_append_sheet(workbook, sheet, "TheoThungGang");
+      XLSX.writeFile(
+        workbook,
+        `bao-cao-thung-gang_${fromLabel}_${toLabel}.xlsx`,
+      );
+      return;
+    }
+
+    window.alert("Báo cáo theo vị trí chưa hỗ trợ xuất Excel.");
   };
 
   return (

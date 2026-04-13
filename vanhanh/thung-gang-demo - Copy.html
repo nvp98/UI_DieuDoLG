@@ -696,15 +696,6 @@
         margin-bottom: 8px;
       }
 
-      .running-stage-section .ladle-icon {
-        background: linear-gradient(135deg, #10b981, #059669);
-        box-shadow:
-          0 0 0 3px rgba(16, 185, 129, 0.18),
-          0 10px 24px rgba(16, 185, 129, 0.28);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        color: #ffffff;
-      }
-
       .stage-name {
         font-family: "Orbitron", sans-serif;
         font-weight: 700;
@@ -2452,23 +2443,6 @@
               <div class="stage-count">0</div>
             </div>
             <div class="stage-ladles" id="stage5-ladles">
-              <div class="empty-stage">Không có thùng gang</div>
-            </div>
-          </div>
-
-          <!-- VÙNG RIÊNG: THÙNG GANG ĐANG CHẠY -->
-          <div
-            class="stage-section running-stage-section"
-            id="runningStage"
-            data-stage="running"
-            style="display: none"
-          >
-            <div class="stage-header">
-              <div class="stage-icon">🏃</div>
-              <div class="stage-name">Thùng gang đang chạy</div>
-              <div class="stage-count" id="runningStageCount">0</div>
-            </div>
-            <div class="stage-ladles" id="runningStageLadles">
               <div class="empty-stage">Không có thùng gang</div>
             </div>
           </div>
@@ -4606,16 +4580,13 @@
        * - Cho phép chỉnh sửa thời gian xác nhận
        * @param {number} transportId - ID của thùng gang cần xác nhận
        */
-      function showConfirmModal(transportId, options = {}) {
+      function showConfirmModal(transportId) {
         const transport = transports.find((t) => t.id === transportId);
         if (!transport) return;
-
-        const isRunningStageMode = Boolean(options.runningStage);
 
         // 🔹 Công đoạn 6: Không cần chờ xác nhận, có thể click vào bất kỳ lúc nào
         // 🔹 Các công đoạn khác: Phải ở trạng thái "waiting-confirm"
         if (
-          !isRunningStageMode &&
           transport.currentStage !== 6 &&
           transport.stageStatus !== "waiting-confirm"
         ) {
@@ -4729,11 +4700,7 @@
 
         // 🔹 Hiển thị/ẩn nút Edit (chỉ ở công đoạn 1 và có quyền)
         const editBtn = document.getElementById("editBtn");
-        if (
-          !isRunningStageMode &&
-          transport.currentStage === 1 &&
-          window.__CAN_CONFIRM_STAGE__
-        ) {
+        if (transport.currentStage === 1 && window.__CAN_CONFIRM_STAGE__) {
           editBtn.style.display = "block";
         } else {
           editBtn.style.display = "none";
@@ -4742,7 +4709,6 @@
         // 🔹 Hiển thị/ẩn nút Xác nhận vào KR (chỉ ở công đoạn 2 và điểm đến là HRC1/HRC2 và có quyền)
         const confirmKRBtn = document.getElementById("confirmKRBtn");
         if (
-          !isRunningStageMode &&
           transport.currentStage === 2 &&
           isHRC &&
           window.__CAN_CONFIRM_STAGE__
@@ -4754,11 +4720,7 @@
 
         // 🔹 Hiển thị/ẩn nút Chuyển Thùng (chỉ ở công đoạn 2 và có quyền)
         const changeDestBtn = document.getElementById("changeDestBtn");
-        if (
-          !isRunningStageMode &&
-          transport.currentStage === 2 &&
-          window.__CAN_CONFIRM_STAGE__
-        ) {
+        if (transport.currentStage === 2 && window.__CAN_CONFIRM_STAGE__) {
           changeDestBtn.style.display = "block";
         } else {
           changeDestBtn.style.display = "none";
@@ -4766,11 +4728,7 @@
 
         // 🔹 Hiển thị/ẩn nút Xử Lý Thùng (chỉ ở công đoạn 6 và có quyền)
         const processLaundleBtn = document.getElementById("processLaundleBtn");
-        if (
-          !isRunningStageMode &&
-          transport.currentStage === 6 &&
-          window.__CAN_CONFIRM_STAGE__
-        ) {
+        if (transport.currentStage === 6 && window.__CAN_CONFIRM_STAGE__) {
           processLaundleBtn.style.display = "block";
         } else {
           processLaundleBtn.style.display = "none";
@@ -4875,46 +4833,23 @@
             break;
         }
 
-        if (isRunningStageMode) {
-          stageStatusDesc.innerHTML =
-            "🏃 Thùng gang đang chạy.<br>" +
-            "Mở thông tin chi tiết và xác nhận hoàn tất Ra LT trực tiếp từ vùng điều độ.";
-          confirmActionDesc.innerHTML =
-            "Chỉ có 1 thao tác xử lý: <strong>Xác nhận hoàn tất (Ra LT)</strong>.<br>" +
-            "Sau khi xác nhận, thùng sẽ được ghi nhận hoàn tất vào hệ thống.";
-        }
-
         // 🔹 Ẩn/hiện nút hoàn tất dựa trên quyền và công đoạn
         const canConfirm = window.__CAN_CONFIRM_STAGE__;
         const confirmCompleteBtn = document.querySelector(
           "#confirmModal .modal-actions .modal-btn-confirm:not(#confirmKRBtn)",
         );
 
-        if (isRunningStageMode) {
-          if (confirmCompleteBtn) {
-            confirmCompleteBtn.style.display = "block";
-            confirmCompleteBtn.innerHTML = "✓ Xác Nhận Hoàn Tất (Ra LT)";
-            confirmCompleteBtn.onclick = () =>
-              completeRunningTransport(transportId);
-          }
-
+        // Nếu đã ở công đoạn cuối (Stage 6 hoặc 7), ẩn tất cả nút xác nhận
+        if (transport.currentStage === 6 || transport.currentStage === 7) {
+          if (confirmCompleteBtn) confirmCompleteBtn.style.display = "none";
           if (editBtn) editBtn.style.display = "none";
           if (confirmKRBtn) confirmKRBtn.style.display = "none";
-          if (changeDestBtn) changeDestBtn.style.display = "none";
-          if (processLaundleBtn) processLaundleBtn.style.display = "none";
+        } else if (!canConfirm) {
+          // Nếu không có quyền, ẩn nút hoàn tất
+          if (confirmCompleteBtn) confirmCompleteBtn.style.display = "none";
         } else {
-          // Nếu đã ở công đoạn cuối (Stage 6 hoặc 7), ẩn tất cả nút xác nhận
-          if (transport.currentStage === 6 || transport.currentStage === 7) {
-            if (confirmCompleteBtn) confirmCompleteBtn.style.display = "none";
-            if (editBtn) editBtn.style.display = "none";
-            if (confirmKRBtn) confirmKRBtn.style.display = "none";
-          } else if (!canConfirm) {
-            // Nếu không có quyền, ẩn nút hoàn tất
-            if (confirmCompleteBtn) confirmCompleteBtn.style.display = "none";
-          } else {
-            // Nếu có quyền và chưa hoàn tất, hiển thị nút hoàn tất
-            if (confirmCompleteBtn) confirmCompleteBtn.style.display = "block";
-          }
+          // Nếu có quyền và chưa hoàn tất, hiển thị nút hoàn tất
+          if (confirmCompleteBtn) confirmCompleteBtn.style.display = "block";
         }
 
         // Hiển thị modal
@@ -5136,32 +5071,32 @@
           const batDauRotRaw = pendingBatDauRotInput?.value?.trim() || "";
           const rotXongRaw = pendingRotXongInput?.value?.trim() || "";
 
-          // if (!batDauRotRaw || !rotXongRaw) {
-          //   alert("⚠️ Vui lòng nhập đầy đủ thời gian bắt đầu rót và rót xong.");
-          //   return;
-          // }
+          if (!batDauRotRaw || !rotXongRaw) {
+            alert("⚠️ Vui lòng nhập đầy đủ thời gian bắt đầu rót và rót xong.");
+            return;
+          }
 
-          // const batDauRotDate = new Date(batDauRotRaw + ":00");
-          // const rotXongDate = new Date(rotXongRaw + ":00");
-          // if (isNaN(batDauRotDate.getTime()) || isNaN(rotXongDate.getTime())) {
-          //   alert("⚠️ Thời gian nhập không hợp lệ.");
-          //   return;
-          // }
+          const batDauRotDate = new Date(batDauRotRaw + ":00");
+          const rotXongDate = new Date(rotXongRaw + ":00");
+          if (isNaN(batDauRotDate.getTime()) || isNaN(rotXongDate.getTime())) {
+            alert("⚠️ Thời gian nhập không hợp lệ.");
+            return;
+          }
 
-          // if (rotXongDate > now) {
-          //   alert("⚠️ Thời gian rót xong không được lớn hơn hiện tại.");
-          //   return;
-          // }
+          if (rotXongDate > now) {
+            alert("⚠️ Thời gian rót xong không được lớn hơn hiện tại.");
+            return;
+          }
 
-          // if (batDauRotDate > rotXongDate) {
-          //   alert("⚠️ Mốc bắt đầu rót phải nhỏ hơn mốc rót đầy thùng.");
-          //   return;
-          // }
+          if (batDauRotDate > rotXongDate) {
+            alert("⚠️ Mốc bắt đầu rót phải nhỏ hơn mốc rót đầy thùng.");
+            return;
+          }
 
           const payload = {
             GioBatDau: getLocalISOString(now),
-            // G_BatDauRot: getLocalISOString(batDauRotDate),
-            G_RotDayThung: getLocalISOString(now.addMinutes(-3)), // Tạm set rót xong trước 3 phút, có thể chỉnh sửa sau khi bắt đầu vận chuyển
+            G_BatDauRot: getLocalISOString(batDauRotDate),
+            G_RotDayThung: getLocalISOString(rotXongDate),
           };
           const response = await updateGangNhatTrinh(containerId, payload);
           closeConfirmModal();
@@ -6194,8 +6129,6 @@
        * - Hiển thị nút xóa/xác nhận tùy theo quyền
        */
       function updateDisplay() {
-        renderRunningStage();
-
         // Cập nhật từng công đoạn (chỉ stage 1-6, stage 7 gộp vào stage 6)
         STAGES.filter((s) => s.id <= 6).forEach((stage) => {
           const stageTransports = transports.filter(
@@ -6323,150 +6256,6 @@
         // Áp dụng lại bộ lọc tìm kiếm nếu có (không scroll lại)
         if (currentSearchTerm) {
           applySearchFilter(false);
-        }
-      }
-
-      function renderRunningStage() {
-        const runningStage = document.getElementById("runningStage");
-        const runningStageCount = document.getElementById("runningStageCount");
-        const runningStageLadles =
-          document.getElementById("runningStageLadles");
-
-        if (!runningStage || !runningStageCount || !runningStageLadles) return;
-
-        const isNMId = getIsNM();
-        if (!isNMId) {
-          runningStage.style.display = "none";
-          return;
-        }
-
-        const runningTransports = transports
-          .filter((transport) => transport.currentStage < 6)
-          .slice()
-          .sort((left, right) => {
-            if (left.currentStage !== right.currentStage) {
-              return left.currentStage - right.currentStage;
-            }
-
-            return String(left.soThung ?? "").localeCompare(
-              String(right.soThung ?? ""),
-              "vi",
-            );
-          });
-
-        runningStageCount.textContent = runningTransports.length;
-
-        if (runningTransports.length === 0) {
-          runningStageLadles.innerHTML =
-            '<div class="empty-stage">Không có thùng gang</div>';
-          runningStage.style.display = "flex";
-          return;
-        }
-
-        runningStageLadles.innerHTML = runningTransports
-          .map((t) => {
-            const elapsed = Math.floor(
-              (getCurrentTimeVN() - t.stageStartTime) / 1000,
-            );
-            const minutes = Math.floor(elapsed / 60);
-            const seconds = elapsed % 60;
-            const timeStr =
-              minutes > 0
-                ? `${minutes.toString().padStart(2, "0")}:${seconds
-                    .toString()
-                    .padStart(2, "0")}`
-                : `00:${seconds.toString().padStart(2, "0")}`;
-
-            const statusClass =
-              t.stageStatus === "completed"
-                ? "completed"
-                : t.stageStatus === "waiting-confirm"
-                  ? "waiting-confirm"
-                  : "processing";
-            const statusText =
-              t.stageStatus === "completed"
-                ? "Chờ chu kỳ mới"
-                : t.stageStatus === "waiting-confirm"
-                  ? "Chờ xác nhận"
-                  : "Đang xử lý";
-            const statusBadgeClass =
-              t.stageStatus === "completed"
-                ? "completed"
-                : t.stageStatus === "waiting-confirm"
-                  ? "waiting"
-                  : "processing";
-
-            return `
-              <div class="ladle-item ${statusClass}" data-transport-id="${t.id}" style="cursor: default;">
-                <div class="ladle-icon">${t.soThung.replace(/\D/g, "")}</div>
-                <div class="ladle-details">
-                  <div class="ladle-id">Thùng ${t.soThung}</div>
-                  <div style="font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    <span><strong>${t.diemDau}</strong></span>
-                    <span style="font-size: 1rem; color: var(--accent-cyan);">→</span>
-                    <span><strong>${t.diemDen}</strong></span>
-                  </div>
-                  ${
-                    t.quayThung
-                      ? `<div style="font-size: 0.75rem; color: var(--success-green); margin-top: 4px; font-weight: 600;">♻️ Quay về: ${t.quayThung}</div>`
-                      : ""
-                  }
-                  <div class="ladle-time">${timeStr}</div>
-                  <span class="ladle-status ${statusBadgeClass}">${statusText}</span>
-                  ${
-                    window.__CAN_CONFIRM_STAGE__
-                      ? `<button class="filter-btn" style="margin-top: 10px; width: 100%; padding: 10px 14px; font-size: 0.78rem; letter-spacing: 1px; background: linear-gradient(135deg, #10b981, #059669); box-shadow: none;" onclick="showRunningStageModal(${t.id})"><span>✓ Xác nhận hoàn tất (Ra LT)</span></button>`
-                      : ""
-                  }
-                </div>
-              </div>
-            `;
-          })
-          .join("");
-
-        runningStage.style.display = "flex";
-      }
-
-      function showRunningStageModal(transportId) {
-        showConfirmModal(transportId, { runningStage: true });
-      }
-
-      async function completeRunningTransport(transportId, event) {
-        if (event) event.stopPropagation();
-
-        if (!window.__CAN_CONFIRM_STAGE__) {
-          alert("⚠️ Bạn không có quyền xác nhận công đoạn!");
-          return;
-        }
-
-        if (
-          !confirm("Bạn có muốn xác nhận hoàn tất (Ra LT) cho thùng này không?")
-        ) {
-          return;
-        }
-
-        const transport = transports.find((t) => t.id === transportId);
-        if (!transport) {
-          alert("⚠️ Không tìm thấy thông tin thùng gang!");
-          return;
-        }
-
-        try {
-          const payload = {
-            GioRaLT: getISOStringVN(getCurrentTimeVN()),
-            TinhTrang: 1,
-            SoThung: transport.soThung,
-            DiemDau: transport.diemDau,
-            DiemDen: transport.diemDen,
-          };
-
-          await updateGangNhatTrinh(transport.id, payload);
-          await loadGhiChepChatGang();
-          await loadDangVanHanhFromApi();
-          closeConfirmModal();
-        } catch (err) {
-          console.error("Complete running transport error:", err);
-          alert(err?.message || "❌ Không thể xác nhận hoàn tất thùng gang");
         }
       }
 
@@ -8177,7 +7966,6 @@
         }
 
         // 🔹 Ẩn/hiện công đoạn theo role
-        const runningStage = document.getElementById("runningStage");
         const stage1Section = document.getElementById("stage1");
         const stage3Section = document.getElementById("stage3"); // Vào KR
         const stage4Section = document.getElementById("stage4"); // Ra KR
@@ -8190,20 +7978,17 @@
           if (stage1Section) stage1Section.style.display = "";
           if (stage3Section) stage3Section.style.display = "";
           if (stage4Section) stage4Section.style.display = "";
-          if (runningStage) runningStage.style.display = "none";
           if (stage6Section) stage6Section.style.display = "";
           if (stagesWrapper) stagesWrapper.classList.remove("hrc-horizontal");
         } else if (role === ROLES.DIEUDO && !loCaoId && !hrcId && !isNMId) {
           // 🔹 DIEUDO TOÀN BỘ: Ẩn công đoạn Vào KR và Ra KR
-          if (runningStage) runningStage.style.display = "none";
           if (stage1Section) stage1Section.style.display = "";
           if (stage3Section) stage3Section.style.display = "none";
           if (stage4Section) stage4Section.style.display = "none";
           if (stage6Section) stage6Section.style.display = "";
           if (stagesWrapper) stagesWrapper.classList.remove("hrc-horizontal");
         } else if (isNMId) {
-          // 🔹 DIEUDO1 hoặc DIEUDO2: Hiện vùng riêng thùng đang chạy
-          if (runningStage) runningStage.style.display = "flex";
+          // 🔹 DIEUDO1 hoặc DIEUDO2: Ẩn công đoạn Vào KR và Ra KR
           if (stage1Section) stage1Section.style.display = "";
           if (stage3Section) stage3Section.style.display = "none";
           if (stage4Section) stage4Section.style.display = "none";
@@ -8211,7 +7996,6 @@
           if (stagesWrapper) stagesWrapper.classList.remove("hrc-horizontal");
         } else if (hrcId) {
           // HRC filter: Chỉ hiển thị stage 2, 3, 4, 5 (Vào gian chờ -> Vào KR -> Ra KR -> Rót xong)
-          if (runningStage) runningStage.style.display = "none";
           if (stage1Section) stage1Section.style.display = "none";
           if (stage3Section) stage3Section.style.display = "";
           if (stage4Section) stage4Section.style.display = "";
@@ -8219,14 +8003,11 @@
           if (stagesWrapper) stagesWrapper.classList.add("hrc-horizontal");
         } else if (loCaoId) {
           // Lò Cao filter: Hiện stage 1, ẩn stage 3, 4 (KR)
-          if (runningStage) runningStage.style.display = "none";
           if (stage1Section) stage1Section.style.display = "";
           if (stage3Section) stage3Section.style.display = "none";
           if (stage4Section) stage4Section.style.display = "none";
           if (stage6Section) stage6Section.style.display = "";
           if (stagesWrapper) stagesWrapper.classList.remove("hrc-horizontal");
-        } else {
-          if (runningStage) runningStage.style.display = "none";
         }
 
         // 🔥 XÁC NHẬN CÔNG ĐOẠN: TRƯỞNG KÍP + ĐIỀU ĐỘ

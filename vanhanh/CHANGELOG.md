@@ -1,6 +1,76 @@
 # 📋 HỆ THỐNG THEO DÕI ĐIỀU ĐỘ THÙNG GANG - CHANGELOG
 
-## 🎯 Phiên bản mới - Ngày 22/01/2026
+## 🎯 Phiên bản mới - Ngày 30/01/2026
+
+### ✨ Tính năng mới
+
+#### 1. **Chỉnh sửa thời gian công đoạn**
+
+- ✅ **Nút chỉnh sửa thời gian** (✏️) trên mỗi công đoạn trong timeline
+- ✅ **Modal chỉnh sửa** cho phép:
+  - Xem thời gian hiện tại của công đoạn
+  - Nhập thời gian mới bằng datetime picker
+  - Hiển thị cảnh báo an toàn dữ liệu
+- ✅ **Validation thông minh**:
+  - Không cho phép thời gian lớn hơn hiện tại
+  - Không cho phép thời gian nhỏ hơn công đoạn trước
+  - Không cho phép thời gian lớn hơn công đoạn sau
+  - Hiển thị thông báo lỗi cụ thể cho từng trường hợp
+- ✅ **Tích hợp API**:
+  - Sử dụng endpoint `PUT /api/gang-nhat-trinh/{id}` hiện có
+  - Cập nhật đúng field tương ứng: GioBatDau, GioVaoLT, GioVaoKR, GioRaKR, GioRotXong, GioRaLT
+  - Tự động refresh dữ liệu sau khi cập nhật thành công
+
+#### 2. **Cải tiến UI/UX**
+
+- ✅ **CSS mới cho nút chỉnh sửa**:
+  - Hiệu ứng hover với glow effect
+  - Animation mượt mà
+  - Màu cam nổi bật (#ff9800)
+- ✅ **Timeline wrapper** cho mỗi công đoạn
+  - Layout flexbox với gap hợp lý
+  - Căn chỉnh nút và thời gian đẹp mắt
+
+### 🔧 Cải tiến kỹ thuật
+
+#### **Kiến trúc code**
+
+```javascript
+// Mapping stage number -> API field
+const stageFieldMap = {
+  1: "GioBatDau",
+  2: "GioVaoLT",
+  3: "GioVaoKR",
+  4: "GioRaKR",
+  5: "GioRotXong",
+  6: "GioRaLT",
+};
+
+// Tên công đoạn cho UX
+const STAGE_NAMES = {
+  1: "🚚 Bắt đầu vận chuyển",
+  2: "⏳ Vào gian chờ thép",
+  3: "🚪 Vào KR",
+  4: "🚶 Ra KR",
+  5: "🔥 Rót xong",
+  6: "✅ Ra luyện thép",
+};
+```
+
+#### **Workflow chỉnh sửa**
+
+1. User click nút ✏️ trên công đoạn
+2. Hệ thống kiểm tra công đoạn có thời gian chưa
+3. Hiển thị modal với thông tin hiện tại
+4. User nhập thời gian mới
+5. Validate thời gian (3 điều kiện)
+6. Gọi API cập nhật
+7. Refresh dữ liệu tự động
+8. Thông báo thành công/thất bại
+
+---
+
+## 🎯 Phiên bản trước - Ngày 22/01/2026
 
 ### ✨ Tính năng mới
 
