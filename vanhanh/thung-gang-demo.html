@@ -5161,7 +5161,7 @@
           const payload = {
             GioBatDau: getLocalISOString(now),
             // G_BatDauRot: getLocalISOString(batDauRotDate),
-            G_RotDayThung: getLocalISOString(now.addMinutes(-3)), // Tạm set rót xong trước 3 phút, có thể chỉnh sửa sau khi bắt đầu vận chuyển
+            G_RotDayThung: getLocalISOString(now), // Tạm set rót xong trước 3 phút, có thể chỉnh sửa sau khi bắt đầu vận chuyển
           };
           const response = await updateGangNhatTrinh(containerId, payload);
           closeConfirmModal();
